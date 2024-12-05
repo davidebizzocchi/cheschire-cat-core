@@ -18,12 +18,12 @@ from langchain_community.document_loaders.parsers.txt import TextParser
 from langchain_community.document_loaders.parsers.html.bs4 import BS4HTMLParser
 from langchain.document_loaders.blob_loaders.schema import Blob
 
-from cat.utils import singleton
+from cat.utils import singleton, singleton_meta
 from cat.log import log
 
 
-@singleton
-class RabbitHole:
+# @singleton
+class RabbitHole(metaclass=singleton_meta):
     """Manages content ingestion. I'm late... I'm late!"""
 
     def __init__(self, cat) -> None:

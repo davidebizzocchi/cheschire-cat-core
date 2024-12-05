@@ -65,11 +65,11 @@ class CheshireCat:
         # load AuthHandler
         self.load_auth()
 
-        # Start scheduling system
-        self.white_rabbit = WhiteRabbit()
-
         # instantiate MadHatter (loads all plugins' hooks and tools)
         self.mad_hatter = MadHatter()
+
+        # Start scheduling system
+        self.white_rabbit = self.mad_hatter.get_option("white_rabbit")()
 
         # allows plugins to do something before cat components are loaded
         self.mad_hatter.execute_hook("before_cat_bootstrap", cat=self)
@@ -86,10 +86,11 @@ class CheshireCat:
         self.embed_procedures()  # first time launched manually
 
         # Main agent instance (for reasoning)
-        self.main_agent = MainAgent()
+        self.main_agent = self.mad_hatter.get_option("main_agent")()
 
         # Rabbit Hole Instance
-        self.rabbit_hole = RabbitHole(self)  # :(
+        # self.rabbit_hole = RabbitHole(self)  # :(
+        self.rabbit_hole = self.mad_hatter.get_option("rabbit_hole")(self)
 
         # allows plugins to do something after the cat bootstrap is complete
         self.mad_hatter.execute_hook("after_cat_bootstrap", cat=self)

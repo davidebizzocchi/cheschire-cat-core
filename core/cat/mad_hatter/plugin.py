@@ -11,7 +11,7 @@ from inspect import getmembers, isclass
 from pydantic import BaseModel, ValidationError
 from packaging.requirements import Requirement
 
-from cat.mad_hatter.decorators import CatTool, CatHook, CatPluginDecorator
+from cat.mad_hatter.decorators import CatTool, CatHook, CatPluginDecorator, CatOption
 from cat.experimental.form import CatForm
 from cat.utils import to_camel_case
 from cat.log import log
@@ -59,6 +59,7 @@ class Plugin:
         self._hooks: List[CatHook] = []  # list of plugin hooks
         self._tools: List[CatTool] = []  # list of plugin tools
         self._forms: List[CatForm] = []  # list of plugin forms
+        self._options: List[CatOption] = [] # list of plugin options
 
         # list of @plugin decorated functions overriding default plugin behaviour
         self._plugin_overrides = []  # TODO: make this a dictionary indexed by func name, for faster access
@@ -99,6 +100,7 @@ class Plugin:
         self._hooks = []
         self._tools = []
         self._plugin_overrides = []
+        self._options = []
         self._active = False
 
     # get plugin settings JSON schema
@@ -296,6 +298,7 @@ class Plugin:
         tools = []
         forms = []
         plugin_overrides = []
+        options = []
 
         for py_file in self.py_files:
             py_filename = py_file.replace(".py", "").replace("/", ".")
@@ -312,6 +315,7 @@ class Plugin:
                 plugin_overrides += getmembers(
                     plugin_module, self._is_cat_plugin_override
                 )
+                options += getmembers(plugin_module, self._is_cat_option)
             except Exception as e:
                 log.error(
                     f"Error in {py_filename}: {str(e)}. Unable to load plugin {self._id}"
@@ -326,6 +330,7 @@ class Plugin:
         self._plugin_overrides = list(
             map(self._clean_plugin_override, plugin_overrides)
         )
+        self._options = list(map(self._clean_option, options))
 
     def plugin_specific_error_message(self):
         name = self.manifest.get("name")
@@ -353,6 +358,11 @@ class Plugin:
     def _clean_plugin_override(self, plugin_override):
         # getmembers returns a tuple
         return plugin_override[1]
+    
+    def _clean_option(self, option: CatOption):
+        o = option[1]
+        o.plugin_id = self._id
+        return o
 
     # a plugin hook function has to be decorated with @hook
     # (which returns an instance of CatHook)
@@ -382,6 +392,10 @@ class Plugin:
     def _is_cat_plugin_override(obj):
         return isinstance(obj, CatPluginDecorator)
 
+    @staticmethod
+    def _is_cat_option(obj):
+        return isinstance(obj, CatOption)
+
     @property
     def path(self):
         return self._path
@@ -409,3 +423,7 @@ class Plugin:
     @property
     def forms(self):
         return self._forms
+    
+    @property
+    def options(self):
+        return self._options
