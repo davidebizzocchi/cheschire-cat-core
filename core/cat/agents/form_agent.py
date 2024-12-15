@@ -20,7 +20,7 @@ class FormAgent(BaseAgent):
         else:
             # continue form
             try:
-                form_output = active_form.next() # form should be async and should be awaited
+                form_output = active_form.next(chat_id) # form should be async and should be awaited
                 return AgentOutput(
                     output=form_output["output"],
                     return_direct=True, # we assume forms always do a return_direct

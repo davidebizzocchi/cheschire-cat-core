@@ -103,7 +103,7 @@ JSON:
         return "true" in response.lower()
 
     # Execute the dialogue step
-    def next(self):
+    def next(self, chat_id="default"):
         # could we enrich prompt completion with episodic/declarative memories?
         # self.cat.working_memory.episodic_memories = []
 
@@ -124,7 +124,7 @@ JSON:
         # If the state is INCOMPLETE, execute model update
         # (and change state based on validation result)
         if self._state == CatFormState.INCOMPLETE:
-            self._model = self.update()
+            self._model = self.update(chat_id)
 
         # If state is COMPLETE, ask confirm (or execute action directly)
         if self._state == CatFormState.COMPLETE:
@@ -139,9 +139,9 @@ JSON:
 
     # Updates the form with the information extracted from the user's response
     # (Return True if the model is updated)
-    def update(self):
+    def update(self, chat_id="default"):
         # Conversation to JSON
-        json_details = self.extract()
+        json_details = self.extract(chat_id)
         json_details = self.sanitize(json_details)
 
         # model merge old and new
@@ -196,8 +196,8 @@ JSON:
         return out
 
     # Extract model informations from user message
-    def extract(self):
-        prompt = self.extraction_prompt()
+    def extract(self, chat_id="default"):
+        prompt = self.extraction_prompt(chat_id)
         log.debug(prompt)
 
         json_str = self.cat.llm(prompt)
@@ -213,8 +213,8 @@ JSON:
 
         return output_model
 
-    def extraction_prompt(self):
-        history = self.cat.stringify_chat_history()
+    def extraction_prompt(self, chat_id="default"):
+        history = self.cat.stringify_chat_history(chat_id=chat_id)
 
         # JSON structure
         # BaseModel.__fields__['my_field'].type_

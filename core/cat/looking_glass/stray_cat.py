@@ -214,10 +214,10 @@ class StrayCat:
 
         # Embed recall query
         recall_query_embedding = self.embedder.embed_query(recall_query)
-        self.working_memory.recall_query = recall_query
+        self.chat_working_memory(chat_id).recall_query = recall_query
         
         # keep track of embedder model usage
-        self.working_memory.model_interactions.append(
+        self.chat_working_memory(chat_id).model_interactions.append(
             EmbedderModelInteraction(
                 prompt=recall_query,
                 reply=recall_query_embedding,
@@ -280,7 +280,7 @@ class StrayCat:
             memories = vector_memory.recall_memories_from_embedding(**config)
 
             setattr(
-                self.working_memory, memory_key, memories
+                self.chat_working_memory(chat_id), memory_key, memories
             )  # self.working_memory.procedural_memories = ...
 
         # hook to modify/enrich retrieved memories
@@ -551,7 +551,7 @@ Allowed classes are:
         # set 0.5 as threshold - let's see if it works properly
         return best_label if score < 0.5 else None
 
-    def stringify_chat_history(self, latest_n: int = 5) -> str:
+    def stringify_chat_history(self, latest_n: int = 5, chat_id="default") -> str:
         """Serialize chat history.
         Converts to text the recent conversation turns.
 
@@ -575,7 +575,7 @@ Allowed classes are:
 
         """
 
-        history = self.working_memory.history[-latest_n:]
+        history = self.chat_working_memory(chat_id).history[-latest_n:]
 
         history_string = ""
         for turn in history:
