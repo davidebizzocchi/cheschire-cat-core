@@ -75,7 +75,7 @@ class ProceduresAgent(BaseAgent):
         )
 
         # Gather recalled procedures
-        recalled_procedures_names: set = self.get_recalled_procedures_names(stray)
+        recalled_procedures_names: set = self.get_recalled_procedures_names(stray, chat_id=chat_id)
         recalled_procedures_names = mad_hatter.execute_hook(
             "agent_allowed_tools", recalled_procedures_names, cat=stray
         )
@@ -168,9 +168,9 @@ class ProceduresAgent(BaseAgent):
         return AgentOutput(output="")
 
     
-    def get_recalled_procedures_names(self, stray) -> set:
+    def get_recalled_procedures_names(self, stray, chat_id="default") -> set:
         recalled_procedures_names = set()
-        for p in stray.working_memory.procedural_memories:
+        for p in stray.chat_working_memory(chat_id).procedural_memories:
             p_type = p[0].metadata["type"]
             p_trigger_type = p[0].metadata["trigger_type"]
             p_source = p[0].metadata["source"]
