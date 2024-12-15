@@ -384,8 +384,6 @@ class StrayCat:
         # text of latest Human message
         user_message_text = chat_working_memory.user_message_json.text
 
-        log.error(f"User message: {user_message_text}")
-
         # update conversation history (Human turn)
         chat_working_memory.update_conversation_history(
             who="Human", message=user_message_text
