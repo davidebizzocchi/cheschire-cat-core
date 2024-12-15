@@ -7,13 +7,13 @@ from langchain_core.output_parsers.string import StrOutputParser
 from cat.looking_glass.callbacks import NewTokenHandler, ModelInteractionHandler
 from cat.agents import BaseAgent, AgentOutput
 from cat import utils
-
+from cat.log import log
 
 class MemoryAgent(BaseAgent):
 
-    async def execute(self, stray, prompt_prefix, prompt_suffix) -> AgentOutput:
+    async def execute(self, stray, prompt_prefix, prompt_suffix, chat_id="default") -> AgentOutput:
 
-        prompt_variables = stray.working_memory.agent_input.model_dump()
+        prompt_variables = stray.chat_working_memory(chat_id).agent_input.model_dump()
         sys_prompt = prompt_prefix + prompt_suffix
 
         # ensure prompt variables and placeholders match
@@ -24,7 +24,7 @@ class MemoryAgent(BaseAgent):
                 SystemMessagePromptTemplate.from_template(
                     template=sys_prompt
                 ),
-                *(stray.langchainfy_chat_history()),
+                *(stray.langchainfy_chat_history(chat_id=chat_id)),
             ]
         )
 
@@ -39,7 +39,7 @@ class MemoryAgent(BaseAgent):
         output = chain.invoke(
             # convert to dict before passing to langchain
             prompt_variables,
-            config=RunnableConfig(callbacks=[NewTokenHandler(stray), ModelInteractionHandler(stray, self.__class__.__name__)])
+            config=RunnableConfig(callbacks=[NewTokenHandler(stray, chat_id), ModelInteractionHandler(stray, self.__class__.__name__)])
         )
 
         return AgentOutput(output=output)

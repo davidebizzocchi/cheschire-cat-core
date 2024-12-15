@@ -26,7 +26,7 @@ class MainAgent(BaseAgent):
         else:
             self.verbose = False
 
-    async def execute(self, stray) -> AgentOutput:
+    async def execute(self, stray, chat_id="default") -> AgentOutput:
         """Execute the agents.
 
         Returns
@@ -38,13 +38,13 @@ class MainAgent(BaseAgent):
         # prepare input to be passed to the agent.
         #   Info will be extracted from working memory
         # Note: agent_input works both as a dict and as an object
-        agent_input : BaseModelDict = self.format_agent_input(stray)
+        agent_input : BaseModelDict = self.format_agent_input(stray, chat_id)
         agent_input = self.mad_hatter.execute_hook(
             "before_agent_starts", agent_input, cat=stray
         )
 
         # store the agent input inside the working memory
-        stray.working_memory.agent_input = agent_input
+        stray.chat_working_memory(chat_id).agent_input = agent_input
 
         # should we run the default agents?
         fast_reply = {}
@@ -66,7 +66,7 @@ class MainAgent(BaseAgent):
 
         # run tools and forms
         procedures_agent = ProceduresAgent()
-        procedures_agent_out : AgentOutput = await procedures_agent.execute(stray)
+        procedures_agent_out : AgentOutput = await procedures_agent.execute(stray, chat_id=chat_id)
         if procedures_agent_out.return_direct:
             return procedures_agent_out
 
@@ -76,14 +76,14 @@ class MainAgent(BaseAgent):
         memory_agent = MemoryAgent()
         memory_agent_out : AgentOutput = await memory_agent.execute(
             # TODO: should all agents only receive stray?
-            stray, prompt_prefix, prompt_suffix
+            stray, prompt_prefix, prompt_suffix, chat_id=chat_id
         )
 
         memory_agent_out.intermediate_steps += procedures_agent_out.intermediate_steps
 
         return memory_agent_out
 
-    def format_agent_input(self, stray):
+    def format_agent_input(self, stray, chat_id="default"):
         """Format the input for the Agent.
 
         The method formats the strings of recalled memories and chat history that will be provided to the Langchain
@@ -109,10 +109,10 @@ class MainAgent(BaseAgent):
 
         # format memories to be inserted in the prompt
         episodic_memory_formatted_content = self.agent_prompt_episodic_memories(
-            stray.working_memory.episodic_memories
+            stray.chat_working_memory(chat_id).episodic_memories
         )
         declarative_memory_formatted_content = self.agent_prompt_declarative_memories(
-            stray.working_memory.declarative_memories
+            stray.chat_working_memory(chat_id).declarative_memories
         )
 
         # format conversation history to be inserted in the prompt
@@ -123,7 +123,7 @@ class MainAgent(BaseAgent):
             "episodic_memory": episodic_memory_formatted_content,
             "declarative_memory": declarative_memory_formatted_content,
             "tools_output": "",
-            "input": stray.working_memory.user_message_json.text,  # TODOV2: take away
+            "input": stray.chat_working_memory(chat_id).user_message_json.text,  # TODOV2: take away
             "chat_history": conversation_history_formatted_content, # TODOV2: take away
         })
 

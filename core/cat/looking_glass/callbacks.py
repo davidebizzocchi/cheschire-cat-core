@@ -1,18 +1,32 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Union
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain_core.outputs.llm_result import LLMResult
+from pydantic import BaseModel
 import tiktoken
 from cat.convo.messages import LLMModelInteraction
 import time
 
 
+class ChatToken(BaseModel):
+    """Class for chat token streaming
+    
+    Variables:
+        token (str): token content
+        chat_id (Optional[str]): chat identifier, defaults to "default"
+    """
+    content: str
+    chat_id: Optional[str] = "default"
+
 class NewTokenHandler(BaseCallbackHandler):
-    def __init__(self, stray):
+    def __init__(self, stray, chat_id="default"):
         # cat could be an instance of CheshireCat or StrayCat
         self.stray = stray
+        self.chat_id = chat_id
 
     def on_llm_new_token(self, token: str, **kwargs) -> None:
-        self.stray.send_ws_message(token, msg_type="chat_token")
+        token_dict = ChatToken(content=token, chat_id=self.chat_id).model_dump()
+
+        self.stray.send_ws_message(token_dict, msg_type="chat_token")
 
 
 class ModelInteractionHandler(BaseCallbackHandler):

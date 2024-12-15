@@ -5,17 +5,17 @@ from cat.log import log
 
 class FormAgent(BaseAgent):
 
-    async def execute(self, stray) -> AgentOutput:
+    async def execute(self, stray, chat_id="default") -> AgentOutput:
 
         # get active form from working memory
-        active_form = stray.working_memory.active_form
+        active_form = stray.chat_working_memory(chat_id).active_form
         
         if not active_form:
             # no active form
             return AgentOutput()
         elif active_form._state == CatFormState.CLOSED:
             # form is closed, delete it from working memory
-            stray.working_memory.active_form = None
+            stray.chat_working_memory(chat_id).active_form = None
             return AgentOutput()
         else:
             # continue form

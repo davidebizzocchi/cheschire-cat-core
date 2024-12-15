@@ -1,4 +1,4 @@
-from typing import List, Literal
+from typing import List, Literal, Optional
 from cat.utils import BaseModelDict
 from langchain_core.messages import BaseMessage, AIMessage, HumanMessage
 from enum import Enum
@@ -64,6 +64,7 @@ class CatMessage(BaseModelDict):
     user_id: str
     type: str = "chat"
     why: MessageWhy | None = None
+    chat_id: Optional[str] = "default"
 
 
 class UserMessage(BaseModelDict):
@@ -72,10 +73,12 @@ class UserMessage(BaseModelDict):
     Variables:
         text (str): user message
         user_id (str): user id
+        chat_id (Optional[str]): chat identifier, defaults to "default"
     """
 
     text: str
     user_id: str
+    chat_id: Optional[str] = "default"
 
 
 def convert_to_Langchain_message(

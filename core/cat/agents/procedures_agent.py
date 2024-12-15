@@ -24,21 +24,21 @@ class ProceduresAgent(BaseAgent):
     form_agent = FormAgent()
     allowed_procedures: Dict[str, CatTool | CatForm] = {}
 
-    async def execute(self, stray) -> AgentOutput:
+    async def execute(self, stray, chat_id="default") -> AgentOutput:
         
         # Run active form if present
-        form_output: AgentOutput = await self.form_agent.execute(stray)
+        form_output: AgentOutput = await self.form_agent.execute(stray, chat_id=chat_id)
         if form_output.return_direct:
             return form_output
         
         # Select and run useful procedures
         intermediate_steps = []
-        procedural_memories = stray.working_memory.procedural_memories
+        procedural_memories = stray.chat_working_memory(chat_id).procedural_memories
         if len(procedural_memories) > 0:
             log.debug(f"Procedural memories retrived: {len(procedural_memories)}.")
 
             try:
-                procedures_result: AgentOutput = await self.execute_procedures(stray)
+                procedures_result: AgentOutput = await self.execute_procedures(stray, chat_id=chat_id)
                 if procedures_result.return_direct:
                     # exit agent if a return_direct procedure was executed
                     return procedures_result
@@ -49,10 +49,10 @@ class ProceduresAgent(BaseAgent):
                 # Adding the tools_output key in agent input, needed by the memory chain
                 # TODO: find a more elegant way to pass this information
                 if len(intermediate_steps) > 0:
-                    stray.working_memory.agent_input.tools_output = "## Context of executed system tools: \n"
+                    stray.chat_working_memory(chat_id).agent_input.tools_output = "## Context of executed system tools: \n"
                     for proc_res in intermediate_steps:
                         # ((step[0].tool, step[0].tool_input), step[1])
-                        stray.working_memory.agent_input.tools_output += (
+                        stray.chat_working_memory(chat_id).agent_input.tools_output += (
                             f" - {proc_res[0][0]}: {proc_res[1]}\n"
                         )
                 return procedures_result
@@ -64,7 +64,7 @@ class ProceduresAgent(BaseAgent):
         return AgentOutput()
 
     
-    async def execute_procedures(self, stray):
+    async def execute_procedures(self, stray, chat_id="default"):
 
         # using some hooks
         mad_hatter = MadHatter()
@@ -90,7 +90,7 @@ class ProceduresAgent(BaseAgent):
         llm_action: LLMAction = await self.execute_chain(stray, procedures_prompt_template, allowed_procedures)
 
         # route execution to subagents
-        return await self.execute_subagents(stray, llm_action, allowed_procedures)
+        return await self.execute_subagents(stray, llm_action, allowed_procedures, chat_id=chat_id)
 
 
     async def execute_chain(self, stray, procedures_prompt_template, allowed_procedures) -> LLMAction:
@@ -136,7 +136,7 @@ class ProceduresAgent(BaseAgent):
         return llm_action
     
     
-    async def execute_subagents(self, stray, llm_action, allowed_procedures):
+    async def execute_subagents(self, stray, llm_action, allowed_procedures, chat_id="default"):
         # execute chosen tool / form
         # loop over allowed tools and forms
         if llm_action.action:
@@ -156,7 +156,7 @@ class ProceduresAgent(BaseAgent):
                     # create form
                     form_instance = chosen_procedure(stray)
                     # store active form in working memory
-                    stray.working_memory.active_form = form_instance
+                    stray.chat_working_memory(chat_id).active_form = form_instance
                     # execute form
                     return await self.form_agent.execute(stray)
                 

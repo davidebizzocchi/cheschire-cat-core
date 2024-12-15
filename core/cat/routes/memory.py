@@ -272,3 +272,46 @@ async def get_conversation_history(
     """Get the specified user's conversation history from working memory"""
 
     return {"history": stray.working_memory.history}
+
+
+# GET lista delle working memories
+@router.get("/working_memories")
+async def get_working_memories_list(
+    request: Request,
+    stray=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
+) -> Dict:
+    """Get list of available working memories"""
+    return {"working_memories": list(stray.working_memories.keys())}
+
+# GET una specifica working memory
+@router.get("/working_memories/{chat_id}")
+async def get_working_memory(
+    request: Request,
+    chat_id: str,
+    stray=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
+) -> Dict:
+    """Get a specific working memory"""
+    if chat_id not in stray.working_memories:
+        raise HTTPException(
+            status_code=404, 
+            detail={"error": f"Working memory {chat_id} does not exist."}
+        )
+    
+    return {"history": stray.working_memories[chat_id].history}
+
+# DELETE una working memory
+@router.delete("/working_memories/{chat_id}") 
+async def delete_working_memory(
+    request: Request,
+    chat_id: str,
+    stray=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.DELETE)),
+) -> Dict:
+    """Delete a specific working memory"""
+    if chat_id not in stray.working_memories:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": f"Working memory {chat_id} does not exist."}
+        )
+        
+    del stray.working_memories[chat_id]
+    return {"deleted": chat_id}
