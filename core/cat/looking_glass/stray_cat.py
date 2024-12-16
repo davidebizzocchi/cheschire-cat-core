@@ -234,7 +234,7 @@ class StrayCat:
             "embedding": recall_query_embedding,
             "k": 3,
             "threshold": 0.7,
-            "metadata": {"source": self.user_id},
+            "metadata": {"source": self.user_id, "chat": chat_id},
         }
 
         default_declarative_recall_config = {
@@ -434,7 +434,7 @@ class StrayCat:
 
         doc = Document(
             page_content=user_message_text,
-            metadata={"source": self.user_id, "when": time.time()},
+            metadata={"source": self.user_id, "when": time.time(), "chat": user_message.chat_id},
         )
         doc = self.mad_hatter.execute_hook(
             "before_cat_stores_episodic_memory", doc, cat=self
