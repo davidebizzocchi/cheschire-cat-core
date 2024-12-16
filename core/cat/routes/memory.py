@@ -262,6 +262,21 @@ async def wipe_conversation_history(
         "deleted": True,
     }
 
+# DELETE vector memory by chat_id
+@router.delete("/conversation_history/{chat_id}")
+async def wipe_vector_memory_by_chat(
+    request: Request,
+    chat_id: str,
+    stray=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.DELETE)),
+) -> Dict:
+    """Delete vector memory points for a specific chat_id"""
+    
+    stray.working_memories[chat_id].history = []
+    
+    return {
+        "deleted": True,
+        "chat_id": chat_id
+    }
 
 # GET conversation history from working memory
 @router.get("/conversation_history")
@@ -314,4 +329,7 @@ async def delete_working_memory(
         )
         
     del stray.working_memories[chat_id]
-    return {"deleted": chat_id}
+    return {
+        "deleted": True,
+        "chat_id": chat_id
+    }
