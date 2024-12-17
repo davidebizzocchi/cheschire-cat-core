@@ -324,10 +324,10 @@ async def delete_working_memory(
 ) -> Dict:
     """Delete a specific working memory"""
     if chat_id not in stray.working_memories:
-        raise HTTPException(
-            status_code=404,
-            detail={"error": f"Working memory {chat_id} does not exist."}
-        )
+        return {
+            "deleted": False,
+            "message": "There is no working memory"
+        }
         
     del stray.working_memories[chat_id]
     return {
