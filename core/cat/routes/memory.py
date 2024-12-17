@@ -241,10 +241,11 @@ async def delete_memory_points_by_metadata(
     vector_memory = ccat.memory.vectors
 
     # delete points
-    vector_memory.collections[collection_id].delete_points_by_metadata_filter(metadata)
+    result = vector_memory.collections[collection_id].delete_points_by_metadata_filter(metadata)
 
     return {
-        "deleted": []  # TODO: Qdrant does not return deleted points?
+        "deleted": [],  # TODO: Qdrant does not return deleted points?
+        "status": result
     }
 
 
