@@ -151,7 +151,7 @@ class WebSocketAuth(ConnectionAuth):
         else:
             stray = StrayCat(
                 ws=connection,
-                user_id=user.name, # TODOV2: user_id should be the user.id
+                user_id=user.id, # TODOV2: user_id should be the user.id
                 user_data=user,
                 main_loop=asyncio.get_running_loop(),
             )
