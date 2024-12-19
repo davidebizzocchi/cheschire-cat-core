@@ -316,3 +316,11 @@ class VectorMemoryCollection:
                 collection_name=self.collection_name, snapshot_name=s.name
             )
         log.warning(f'Dump "{new_name}" completed')
+
+    def update_points_by_metadata(self, points_ids=[], metadata={}):
+        res = self.client.set_payload(
+            collection_name=self.collection_name,
+            points=points_ids,
+            payload=metadata,
+        )
+        return res
