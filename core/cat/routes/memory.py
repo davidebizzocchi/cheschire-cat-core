@@ -15,6 +15,10 @@ class MemoryPoint(MemoryPointBase):
     id: str
     vector: List[float]
 
+class MetadataUpdate(BaseModel):
+    search: Dict = {}
+    update: Dict = {}
+
 router = APIRouter()
 
 
@@ -333,4 +337,162 @@ async def delete_working_memory(
     return {
         "deleted": True,
         "chat_id": chat_id
+    }
+
+# PATCH collection points metadata
+@router.patch("/collections/{collection_id}/points/metadata")
+async def update_points_metadata(
+    request: Request,
+    metadata: MetadataUpdate,
+    collection_id: str = "declarative",
+    stray=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.WRITE)),
+) -> Dict:
+    """Update points metadata in a collection by metadata filter"""
+    
+    vector_memory = stray.memory.vectors
+    collection = vector_memory.collections.get(collection_id)
+    
+    if not collection:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "Collection does not exist."}
+        )
+
+    # Construct filter from search metadata
+    query_filter = collection._qdrant_filter_from_dict(metadata.search)
+    
+    # Search directly using the constructed filter
+    points = vector_memory.vector_db.scroll(
+        collection_name=collection_id,
+        scroll_filter=query_filter,
+        with_payload=True,
+        with_vectors=False,
+        limit=10000 
+    )[0]
+
+    if not points:
+        return {
+            "matched_points": [],
+            "message": "No points found matching search criteria"
+        }
+
+    # Extract points data and update metadata
+    matched_points = []
+    for p in points:
+        current_metadata = p.payload.get("metadata", {}).copy()
+        current_metadata.update(metadata.update)
+        matched_points.append({
+            "id": p.id,
+            "metadata": current_metadata
+        })
+
+    # Update metadata for all points at once, using the complete updated metadata
+    # corretto perché memorie delle stesso file
+    result = collection.update_points_by_metadata(
+        points_ids=[p["id"] for p in matched_points],
+        metadata={"metadata": matched_points[0]["metadata"]}  # Usiamo il metadata completo aggiornato
+    )
+
+    return {
+        "matched_points": matched_points,
+        "count": len(matched_points),
+        "status": result
+    }
+
+# GET points by metadata
+@router.get("/collections/{collection_id}/points")
+async def get_points_by_metadata(
+    request: Request,
+    collection_id: str,
+    metadata: Dict = {},
+    stray=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
+) -> Dict:
+    """Get points in a collection by metadata filter"""
+    
+    vector_memory = stray.memory.vectors
+    collection = vector_memory.collections.get(collection_id)
+    
+    if not collection:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "Collection does not exist."}
+        )
+
+    # Construct filter from metadata
+    query_filter = collection._qdrant_filter_from_dict(metadata)
+    
+    # Search points with the filter
+    points = vector_memory.vector_db.scroll(
+        collection_name=collection_id,
+        scroll_filter=query_filter,
+        with_payload=True,
+        with_vectors=False,
+        limit=10000 
+    )[0]  # scroll returns (points, next_page_offset)
+
+    if not points:
+        return {
+            "points": [],
+            "count": 0,
+            "message": "No points found matching metadata criteria"
+        }
+
+    # Extract points data
+    matched_points = [{
+        "id": p.id,
+        "metadata": p.payload.get("metadata", {}),
+    } for p in points]
+
+    return {
+        "points": matched_points,
+        "count": len(matched_points)
+    }
+
+# GET points filtered by metadata
+@router.get("/collections/{collection_id}/points/by_metadata")
+async def get_points_metadata_only(
+    request: Request,
+    collection_id: str,
+    metadata: Dict = {},
+    stray=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
+) -> Dict:
+    """Get only metadata of points in a collection filtered by metadata criteria"""
+    
+    vector_memory = stray.memory.vectors
+    collection = vector_memory.collections.get(collection_id)
+    
+    if not collection:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "Collection does not exist."}
+        )
+
+    # Construct filter from metadata
+    query_filter = collection._qdrant_filter_from_dict(metadata)
+    
+    # Search points with the filter
+    points = vector_memory.vector_db.scroll(
+        collection_name=collection_id,
+        scroll_filter=query_filter,
+        with_payload=True,
+        with_vectors=False,
+        limit=10000 
+    )[0]  # scroll returns (points, next_page_offset)
+
+    if not points:
+        return {
+            "points": [],
+            "count": 0,
+            "message": "No points found matching metadata criteria"
+        }
+
+    # Extract points data
+    matched_points = [{
+        "id": p.id,
+        "metadata": p.payload.get("metadata", {}),
+    } for p in points]
+
+    return {
+        "points": matched_points,
+        "count": len(matched_points)
     }
