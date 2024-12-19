@@ -496,3 +496,78 @@ async def get_points_metadata_only(
         "points": matched_points,
         "count": len(matched_points)
     }
+
+@router.patch("/collections/{collection_id}/points/edit_chat_ids")
+async def edit_chat_to_memories_from_metadata(
+    request: Request,
+    collection_id: str,
+    mode: str = Query(..., description="Mode of operation: 'add' or 'remove'"),  # Make mode a required query parameter
+    search_metadata: Dict = {},
+    chats_id: List[str] = [],
+    stray=Depends(HTTPAuth(AuthResource.MEMORY, AuthPermission.READ)),
+) -> Dict:
+    """Add or remove chats_id to/from metadata of points in a collection filtered by metadata criteria"""
+    
+    vector_memory = stray.memory.vectors
+    collection = vector_memory.collections.get(collection_id)
+    
+    if not collection:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "Collection does not exist."}
+        )
+
+    # Construct filter from search metadata
+    query_filter = collection._qdrant_filter_from_dict(search_metadata)
+    
+    # Search directly using the constructed filter
+    points = vector_memory.vector_db.scroll(
+        collection_name=collection_id,
+        scroll_filter=query_filter,
+        with_payload=True,
+        with_vectors=False,
+        limit=10000 
+    )[0]
+
+    if not points:
+        return {
+            "matched_points": [],
+            "message": "No points found matching search criteria"
+        }
+
+    # Get metadata from first point
+    first_point = points[0]
+    current_metadata = first_point.payload.get("metadata", {}).copy()
+    
+    # Initialize chat_ids list if not present
+    if "chats_id" not in current_metadata:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "Metadata does not contain chat_ids field"}
+        )
+        
+
+    # Add or remove chat_ids based on mode
+    if mode == "add":
+        # Add new chat_ids without duplicates
+        current_metadata["chats_id"] = list(set(current_metadata["chats_id"] + chats_id))
+    elif mode == "remove":
+        # Remove specified chat_ids
+        current_metadata["chats_id"] = [chat_id for chat_id in current_metadata["chats_id"] if chat_id not in chats_id]
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "Invalid mode specified, use 'add' or 'remove'"}
+        )
+    
+    # Update all points with new metadata
+    result = collection.update_points_by_metadata(
+        points_ids=[p.id for p in points],
+        metadata={"metadata": current_metadata}
+    )
+
+    return {
+        "matched_points": len(points),
+        "updated_metadata": current_metadata,
+        "status": result
+    }
