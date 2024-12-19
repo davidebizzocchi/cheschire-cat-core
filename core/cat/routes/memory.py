@@ -541,10 +541,7 @@ async def edit_chat_to_memories_from_metadata(
     
     # Initialize chat_ids list if not present
     if "chats_id" not in current_metadata:
-        raise HTTPException(
-            status_code=400,
-            detail={"error": "Metadata does not contain chat_ids field"}
-        )
+        current_metadata["chats_id"] = []
         
 
     # Add or remove chat_ids based on mode
