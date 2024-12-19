@@ -237,11 +237,15 @@ class StrayCat:
             "metadata": {"source": self.user_id, "chat": chat_id},
         }
 
+        declarative_metadata = None
+        if chat_id != "default":
+            declarative_metadata = {"chats_id": chat_id}
+
         default_declarative_recall_config = {
             "embedding": recall_query_embedding,
             "k": 3,
             "threshold": 0.7,
-            "metadata": None,
+            "metadata": declarative_metadata,
         }
 
         default_procedural_recall_config = {
