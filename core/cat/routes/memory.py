@@ -276,7 +276,8 @@ async def wipe_vector_memory_by_chat(
 ) -> Dict:
     """Delete vector memory points for a specific chat_id"""
     
-    stray.working_memories[chat_id].history = []
+    if chat_id in stray.working_memories:
+        stray.working_memories[chat_id].history = []
     
     return {
         "deleted": True,
