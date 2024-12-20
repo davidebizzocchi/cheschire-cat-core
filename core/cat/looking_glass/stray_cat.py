@@ -20,7 +20,7 @@ from cat.convo.messages import CatMessage, UserMessage, MessageWhy, Role, Embedd
 from cat.agents import AgentOutput
 from cat import utils
 
-MSG_TYPES = Literal["notification", "chat", "error", "chat_token"]
+MSG_TYPES = Literal["notification", "chat", "error", "chat_token", "json-notification"]
 
 
 # The Stray cat goes around tools and hook, making troubles
