@@ -352,6 +352,11 @@ class RabbitHole(metaclass=singleton_meta):
         time_last_notification = time.time()
         time_interval = 10  # a notification every 10 secs
         stored_points = []
+        file_source = source
+
+        if "file_id" in metadata.keys():
+            file_source = metadata["file_id"]
+
         for d, doc in enumerate(docs):
             if time.time() - time_last_notification > time_interval:
                 time_last_notification = time.time()
@@ -365,7 +370,7 @@ class RabbitHole(metaclass=singleton_meta):
                         "content": {
                             "status": "progress",
                             "perc_read": perc_read,
-                            "source": source,
+                            "source": file_source,
                             "type": "doc-reading-progress",
                     }
                     }, "json-notification"
@@ -418,7 +423,7 @@ class RabbitHole(metaclass=singleton_meta):
                 "content": {
                 "status": "done",
                 "perc_read": 100,
-                "source": source,
+                "source": file_source,
                 "type": "doc-reading-progress",
             }
             }, "json-notification"
