@@ -358,6 +358,17 @@ class RabbitHole(metaclass=singleton_meta):
                 perc_read = int(d / len(docs) * 100)
                 read_message = f"Read {perc_read}% of {source}"
                 stray.send_ws_message(read_message)
+
+                # send little dict with info
+                stray.send_ws_message(
+                    {
+                        "status": "progress",
+                        "perc_read": perc_read,
+                        "source": source,
+                        "typology": "doc-reading-progress",
+                    }, "json-notification"
+                )
+                
                 log.warning(read_message)
 
             # add default metadata
@@ -398,6 +409,16 @@ class RabbitHole(metaclass=singleton_meta):
         )
 
         stray.send_ws_message(finished_reading_message)
+
+        # build little dict
+        stray.send_ws_message(
+            {
+                "status": "done",
+                "perc_read": 100,
+                "source": source,
+                "typology": "doc-reading-progress",
+            }, "json-notification"
+        )
 
         log.warning(f"Done uploading {source}")
 
