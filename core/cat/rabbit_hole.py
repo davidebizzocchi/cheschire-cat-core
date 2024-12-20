@@ -362,10 +362,12 @@ class RabbitHole(metaclass=singleton_meta):
                 # send little dict with info
                 stray.send_ws_message(
                     {
-                        "status": "progress",
-                        "perc_read": perc_read,
-                        "source": source,
-                        "typology": "doc-reading-progress",
+                        "content": {
+                            "status": "progress",
+                            "perc_read": perc_read,
+                            "source": source,
+                            "type": "doc-reading-progress",
+                    }
                     }, "json-notification"
                 )
                 
@@ -413,10 +415,12 @@ class RabbitHole(metaclass=singleton_meta):
         # build little dict
         stray.send_ws_message(
             {
+                "content": {
                 "status": "done",
                 "perc_read": 100,
                 "source": source,
-                "typology": "doc-reading-progress",
+                "type": "doc-reading-progress",
+            }
             }, "json-notification"
         )
 
