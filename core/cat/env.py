@@ -1,6 +1,5 @@
 import os
 
-
 def get_supported_env_variables():
     return {
         "CCAT_CORE_HOST": "localhost",
