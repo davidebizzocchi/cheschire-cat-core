@@ -358,25 +358,26 @@ class RabbitHole(metaclass=singleton_meta):
             file_source = metadata["file_id"]
 
         for d, doc in enumerate(docs):
+            perc_read = int(d / len(docs) * 100)
+            
             if time.time() - time_last_notification > time_interval:
                 time_last_notification = time.time()
-                perc_read = int(d / len(docs) * 100)
                 read_message = f"Read {perc_read}% of {source}"
                 stray.send_ws_message(read_message)
-
-                # send little dict with info
-                stray.send_ws_message(
-                    {
-                        "content": {
-                            "status": "progress",
-                            "perc_read": perc_read,
-                            "source": file_source,
-                            "type": "doc-reading-progress",
-                    }
-                    }, "json-notification"
-                )
                 
                 log.warning(read_message)
+
+            # send little dict with info
+            stray.send_ws_message(
+                {
+                    "content": {
+                        "status": "progress",
+                        "perc_read": perc_read,
+                        "source": file_source,
+                        "type": "doc-reading-progress",
+                }
+                }, "json-notification"
+            )
 
             # add default metadata
             doc.metadata["source"] = source
