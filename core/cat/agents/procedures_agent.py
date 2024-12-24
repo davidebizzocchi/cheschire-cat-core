@@ -87,13 +87,13 @@ class ProceduresAgent(BaseAgent):
             )
 
         # Execute chain and obtain a choice of procedure from the LLM
-        llm_action: LLMAction = await self.execute_chain(stray, procedures_prompt_template, allowed_procedures)
+        llm_action: LLMAction = await self.execute_chain(stray, procedures_prompt_template, allowed_procedures, chat_id=chat_id)
 
         # route execution to subagents
         return await self.execute_subagents(stray, llm_action, allowed_procedures, chat_id=chat_id)
 
 
-    async def execute_chain(self, stray, procedures_prompt_template, allowed_procedures) -> LLMAction:
+    async def execute_chain(self, stray, procedures_prompt_template, allowed_procedures, chat_id="default") -> LLMAction:
         
         # Prepare info to fill up the prompt
         prompt_variables = {
@@ -130,7 +130,7 @@ class ProceduresAgent(BaseAgent):
 
         llm_action: LLMAction = chain.invoke(
             prompt_variables,
-            config=RunnableConfig(callbacks=[ModelInteractionHandler(stray, self.__class__.__name__)])
+            config=RunnableConfig(callbacks=[ModelInteractionHandler(stray, self.__class__.__name__, chat_id=chat_id)])
         )
 
         return llm_action

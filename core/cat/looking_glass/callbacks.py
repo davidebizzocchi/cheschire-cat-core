@@ -34,9 +34,10 @@ class ModelInteractionHandler(BaseCallbackHandler):
     Langchain callback handler for tracking model interactions.
     """
 
-    def __init__(self, stray, source: str):
+    def __init__(self, stray, source: str, chat_id: str = "default"):
         self.stray = stray
-        self.stray.working_memory.model_interactions.append(
+        self.chat_id = chat_id
+        self.stray.chat_working_memory(chat_id).model_interactions.append(
             LLMModelInteraction(
                 source=source,
                 prompt="",
@@ -64,4 +65,4 @@ class ModelInteractionHandler(BaseCallbackHandler):
 
     @property
     def last_interaction(self) -> LLMModelInteraction:
-        return self.stray.working_memory.model_interactions[-1]
+        return self.stray.chat_working_memory(self.chat_id).model_interactions[-1]
