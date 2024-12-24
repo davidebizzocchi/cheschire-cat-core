@@ -314,7 +314,7 @@ class StrayCat:
 
         # Add a token counter to the callbacks
         caller = utils.get_caller_info()
-        callbacks.append(ModelInteractionHandler(self, caller or "StrayCat"))
+        callbacks.append(ModelInteractionHandler(self, caller or "StrayCat", chat_id=chat_id))
 
         
 
@@ -379,6 +379,22 @@ class StrayCat:
 
         # keeping track of model interactions
         chat_working_memory.model_interactions = []
+
+        # Chat completition
+        chat_completition_id = "completition"
+        if user_message.chat_id == chat_completition_id:
+            response = self.llm(
+                user_message.text,
+                stream=True,
+                chat_id=chat_completition_id
+            )
+
+            return CatMessage(
+                content=response,
+                user_id=self.user_id,
+                chat_id="completition",
+                why=self.__build_why(chat_id=chat_completition_id)
+            )
 
         # hook to modify/enrich user input
         chat_working_memory.user_message_json = self.mad_hatter.execute_hook(
