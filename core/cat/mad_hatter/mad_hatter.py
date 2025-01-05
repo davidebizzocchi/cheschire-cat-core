@@ -18,9 +18,12 @@ from cat.mad_hatter.plugin_extractor import PluginExtractor
 from cat.mad_hatter.plugin import Plugin
 from cat.mad_hatter.decorators.hook import CatHook
 from cat.mad_hatter.decorators.tool import CatTool
-from cat.mad_hatter.decorators.options import CatOption, CustomEndpoint
+from cat.mad_hatter.decorators.options import CatOption
+from cat.mad_hatter.decorators.endpoint import  CustomEndpoint
 
 from cat.experimental.form import CatForm
+
+from cat.utils import set_redirect_class
 
 
 # This class is responsible for plugins functionality:
@@ -177,8 +180,16 @@ class MadHatter:
         for option_name in self.options.keys():
             self.options[option_name].sort(key=lambda x: x.priority, reverse=True)
 
+        self.set_options()
+
         # notify sync has finished (the Cat will ensure all tools are embedded in vector memory)
         self.on_finish_plugins_sync_callback()
+
+    def set_options(self):
+        for option_name in self.options.keys():
+            option = self.options[option_name][0]
+            
+            set_redirect_class(option.old_class, option.class_)
 
     # check if plugin exists
     def plugin_exists(self, plugin_id):
