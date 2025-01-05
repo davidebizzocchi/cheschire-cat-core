@@ -5,19 +5,19 @@ from cat.looking_glass.white_rabbit import WhiteRabbit
 from cat.log import log
 
 
-@option("rabbit_hole", priority=0)
+@option("RabbitHole", priority=0)
 class RabbitHoleDefault(RabbitHole):
      def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         log.warning("\n\n\nWELLAAA!!!!!!\n\n\n")
 
-@option("white_rabbit", priority=0)
+@option("WhiteRabbit", priority=0)
 class WhiteRabbitDefault(WhiteRabbit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         log.warning("\n\n\nWELLAAA!!!!!!\n\n\n")
 
-@option("main_agent", priority=0)
+@option("MainAgent", priority=0)
 class MainAgentDefault(MainAgent):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
