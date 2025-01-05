@@ -18,7 +18,7 @@ from cat.mad_hatter.plugin_extractor import PluginExtractor
 from cat.mad_hatter.plugin import Plugin
 from cat.mad_hatter.decorators.hook import CatHook
 from cat.mad_hatter.decorators.tool import CatTool
-from cat.mad_hatter.decorators.endpoint import CustomEndpoint
+from cat.mad_hatter.decorators.options import CatOption, CustomEndpoint
 
 from cat.experimental.form import CatForm
 
@@ -46,6 +46,10 @@ class MadHatter:
         self.endpoints: List[CustomEndpoint] = []  # list of active plugins endpoints
 
         self.active_plugins: List[str] = []
+
+        self.options: Dict[
+            str, List[CatOption]
+        ] = {}  # dict of active plugins options ( option_name -> [CatOption, CatOption, ...])
 
         self.plugins_folder = utils.get_plugins_path()
 
@@ -140,6 +144,7 @@ class MadHatter:
         self.hooks = {}
         self.tools = []
         self.forms = []
+        self.options = {}
         self.endpoints = []
 
         for _, plugin in self.plugins.items():
@@ -158,9 +163,19 @@ class MadHatter:
                         self.hooks[h.name] = []
                     self.hooks[h.name].append(h)
 
+                # cache options (indexed by option name)
+                for o in plugin.options:
+                    if o.name not in self.options.keys():
+                        self.options[o.name] = []
+                    self.options[o.name].append(o)
+
         # sort each hooks list by priority
         for hook_name in self.hooks.keys():
             self.hooks[hook_name].sort(key=lambda x: x.priority, reverse=True)
+
+        # sort each options list by priority
+        for option_name in self.options.keys():
+            self.options[option_name].sort(key=lambda x: x.priority, reverse=True)
 
         # notify sync has finished (the Cat will ensure all tools are embedded in vector memory)
         self.on_finish_plugins_sync_callback()
@@ -236,6 +251,21 @@ class MadHatter:
 
         else:
             raise Exception("Plugin {plugin_id} not present in plugins folder")
+        
+    def get_option(self, option_type, *args):
+        # check if option is supported
+        if isinstance(option_type, str):
+            option_name = option_type
+        else:
+            option_name = option_type.__name__
+
+        if option_name not in self.options.keys():
+            return option_type
+
+        # return the most important option
+        return self.options[option_name][0].class_
+
+        raise Exception(f"No matching option found for {option_name} with args {args}")
 
     # execute requested hook
     def execute_hook(self, hook_name, *args, cat):

@@ -1,5 +1,6 @@
 from typing import List
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, ABCMeta
+from cat.utils import singleton_meta
 
 
 from cat.utils import BaseModelDict
@@ -9,8 +10,10 @@ class AgentOutput(BaseModelDict):
     intermediate_steps: List = []
     return_direct: bool = False
 
+class Meta(singleton_meta, ABCMeta):
+    pass
 
-class BaseAgent(ABC):
+class BaseAgent(ABC, metaclass=Meta):
 
     @abstractmethod
     def execute(*args, **kwargs) -> AgentOutput:
