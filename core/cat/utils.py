@@ -264,6 +264,84 @@ class singleton_meta(type):
             # If instance doesn't exist, create and store it
             cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
+    
+class redirect_meta(type):
+    """A metaclass to implement class redirection."""
+    
+    # Dictionary to hold the redirection mapping for classes
+    _redirect_to = {}
+
+    def __new__(cls, name, bases, dct):
+        """
+        Called when a new class is created. Adds automatic redirection for the class.
+        
+        If the class has a custom redirection class (_redirect_class), 
+        the redirection will be set to that class.
+        """
+        # Create the new class using the metaclass
+        new_class = super().__new__(cls, name, bases, dct)
+        
+        # If the class has a custom redirection class, store it in the _redirect_to dictionary
+        if hasattr(new_class, '_redirect_class'):
+            redirect_meta._redirect_to[new_class] = new_class._redirect_class
+            
+        return new_class
+    
+    @classmethod
+    def set_redirect(cls, redirected_class):
+        """
+        Method to dynamically set a redirection for a class to another class.
+        
+        Args:
+            redirected_class (type): The class to redirect to.
+        """
+        # Set the redirection for the current class
+        cls._redirect_to[cls] = redirected_class
+        log.debug(f"Redirection set: {cls.__name__} -> {redirected_class.__name__}")
+
+    def __call__(cls, *args, **kwargs):
+        """
+        Called when an instance of the class is created. If a redirection is set, 
+        it uses the redirected class instead of the original class.
+        
+        Args:
+            *args: Arguments passed to the class constructor.
+            **kwargs: Keyword arguments passed to the class constructor.
+        
+        Returns:
+            An instance of the redirected class if redirection is set, 
+            otherwise an instance of the original class.
+        """
+        # If the class has a redirection set, use the redirected class
+        redirect_class = cls._redirect_to.get(cls)
+        if redirect_class:
+            cls = redirect_class  # Redirect to the custom class
+            log.warning(f"Redirecting {cls.__name__} to {redirect_class.__name__}")
+        
+        # Call the original metaclass constructor if no redirection
+        return super().__call__(*args, **kwargs)
+    
+
+def set_redirect_class(original_class, redirected_class):
+    """
+    Set a class redirection for the original class to the redirected class.
+    
+    Args:
+        original_class (type): The class that will be redirected.
+        redirected_class (type): The class to redirect to.
+    """
+    original_class._redirect_to[original_class] = redirected_class
+
+
+class singleton_redirect_meta(singleton_meta, redirect_meta):
+    """
+    A metaclass that combines the Singleton pattern and class redirection.
+    
+    Inherits from both singleton_meta (to implement Singleton pattern) 
+    and redirect_meta (to handle class redirection).
+    """
+    pass
+
 
 
 # Class mixing pydantic BaseModel with dictionaries (added for backward compatibility, to be deprecated in v2)
