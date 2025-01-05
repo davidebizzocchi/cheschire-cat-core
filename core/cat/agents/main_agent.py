@@ -12,8 +12,13 @@ from cat.agents import BaseAgent, AgentOutput
 from cat.agents.memory_agent import MemoryAgent
 from cat.agents.procedures_agent import ProceduresAgent
 
+from cat.utils import redirect_meta
+from cat.agents.base_agent import Meta
 
-class MainAgent(BaseAgent):
+class MainAgentMeta(Meta, redirect_meta):
+    pass
+
+class MainAgent(BaseAgent, metaclass=MainAgentMeta):
     """Main Agent.
     This class manages sub agents that in turn use the LLM.
     """
