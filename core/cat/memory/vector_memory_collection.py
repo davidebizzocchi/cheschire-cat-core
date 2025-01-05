@@ -38,7 +38,7 @@ class VectorMemoryCollection:
         # Set attributes (metadata on the embedder are useful because it may change at runtime)
         self.client = client
         self.collection_name = collection_name
-        self.embedder_name = embedder_name
+        self.embedder_name = str(embedder_name)
         self.embedder_size = embedder_size
 
         # Check if memory collection exists also in vectorDB, otherwise create it
@@ -59,25 +59,28 @@ class VectorMemoryCollection:
             == self.embedder_size
         )
         alias = self.embedder_name + "_" + self.collection_name
-        if (
-            alias
-            == self.client.get_collection_aliases(self.collection_name)
-            .aliases[0]
-            .alias_name
-            and same_size
-        ):
-            log.debug(f'Collection "{self.collection_name}" has the same embedder')
-        else:
-            log.warning(f'Collection "{self.collection_name}" has different embedder')
-            # Memory snapshot saving can be turned off in the .env file with:
-            # SAVE_MEMORY_SNAPSHOTS=false
-            if get_env("CCAT_SAVE_MEMORY_SNAPSHOTS") == "true":
-                # dump collection on disk before deleting
-                self.save_dump()
-                log.info(f"Dump '{self.collection_name}' completed")
+        if len(self.client.get_collection_aliases(self.collection_name).aliases) > 1:
+            if (
+                alias
+                == self.client.get_collection_aliases(self.collection_name)
+                .aliases[0]
+                .alias_name
+                and same_size
+            ):
+                log.debug(f'Collection "{self.collection_name}" has the same embedder')
+            else:
+                log.warning(f'Collection "{self.collection_name}" has different embedder')
+                # Memory snapshot saving can be turned off in the .env file with:
+                # SAVE_MEMORY_SNAPSHOTS=false
+                if get_env("CCAT_SAVE_MEMORY_SNAPSHOTS") == "true":
+                    # dump collection on disk before deleting
+                    self.save_dump()
+                    log.info(f"Dump '{self.collection_name}' completed")
 
-            self.client.delete_collection(self.collection_name)
-            log.warning(f"Collection '{self.collection_name}' deleted")
+                self.client.delete_collection(self.collection_name)
+                log.warning(f"Collection '{self.collection_name}' deleted")
+                self.create_collection()
+        else:
             self.create_collection()
 
     def create_db_collection_if_not_exists(self):
@@ -116,7 +119,7 @@ class VectorMemoryCollection:
                 CreateAliasOperation(
                     create_alias=CreateAlias(
                         collection_name=self.collection_name,
-                        alias_name=self.embedder_name + "_" + self.collection_name,
+                        alias_name= self.embedder_name + "_" + self.collection_name,
                     )
                 )
             ]
