@@ -248,10 +248,15 @@ class MadHatter:
         else:
             raise Exception("Plugin {plugin_id} not present in plugins folder")
         
-    def get_option(self, option_name, *args):
+    def get_option(self, option_type, *args):
         # check if option is supported
+        if isinstance(option_type, str):
+            option_name = option_type
+        else:
+            option_name = option_type.__name__
+
         if option_name not in self.options.keys():
-            raise Exception(f"Option {option_name} not present in any plugin")
+            return option_type
 
         # return the most important option
         return self.options[option_name][0].class_
