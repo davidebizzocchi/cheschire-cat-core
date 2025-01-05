@@ -8,9 +8,9 @@ from langchain_core.messages import SystemMessage
 from langchain_core.runnables import RunnableLambda
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers.string import StrOutputParser
-from langchain_community.llms import Cohere
 from langchain_openai import ChatOpenAI, OpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_cohere import ChatCohere
 
 from cat.factory.auth_handler import get_auth_handler_from_name
 from cat.factory.custom_auth_handler import CoreAuthHandler
@@ -28,6 +28,7 @@ from cat.memory.long_term_memory import LongTermMemory
 from cat.rabbit_hole import RabbitHole
 from cat.utils import singleton
 from cat import utils
+
 
 class Procedure(Protocol):
     name: str
@@ -54,13 +55,16 @@ class CheshireCat:
 
     """
 
-    def __init__(self):
+    def __init__(self, fastapi_app):
         """Cat initialization.
 
         At init time the Cat executes the bootstrap.
         """
 
         # bootstrap the Cat! ^._.^
+
+        # get reference to the FastAPI app
+        self.fastapi_app = fastapi_app
 
         # load AuthHandler
         self.load_auth()
@@ -80,10 +84,11 @@ class CheshireCat:
         # Load memories (vector collections and working_memory)
         self.load_memory()
 
-        # After memory is loaded, we can get/create tools embeddings
-        # every time the mad_hatter finishes syncing hooks, tools and forms, it will notify the Cat (so it can embed tools in vector memory)
-        self.mad_hatter.on_finish_plugins_sync_callback = self.embed_procedures
-        self.embed_procedures()  # first time launched manually
+        # After memory is loaded, we can get/create tools embeddings      
+        self.mad_hatter.on_finish_plugins_sync_callback = self.on_finish_plugins_sync_callback
+ 
+        # First time launched manually       
+        self.on_finish_plugins_sync_callback()
 
         # Main agent instance (for reasoning)
         self.main_agent = self.mad_hatter.get_option(MainAgent)()
@@ -205,7 +210,7 @@ class CheshireCat:
         # For Azure avoid automatic embedder selection
 
         # Cohere
-        elif type(self._llm) in [Cohere]:
+        elif type(self._llm) in [ChatCohere]:
             embedder = embedders.EmbedderCohereConfig.get_embedder_from_config(
                 {
                     "cohere_api_key": self._llm.cohere_api_key,
@@ -232,7 +237,6 @@ class CheshireCat:
         return embedder
 
     def load_auth(self):
-
         # Custom auth_handler # TODOAUTH: change the name to custom_auth
         selected_auth_handler = crud.get_setting_by_name(name="auth_handler_selected")
 
@@ -333,9 +337,18 @@ class CheshireCat:
                     }
         return hashes
 
+    def on_finish_plugins_sync_callback(self):
+        self.activate_endpoints()
+        self.embed_procedures()
+
+    def activate_endpoints(self):
+        for endpoint in self.mad_hatter.endpoints:
+            if endpoint.plugin_id in self.mad_hatter.active_plugins:
+                endpoint.activate(self.fastapi_app)
+
     def embed_procedures(self):
         # Retrieve from vectorDB all procedural embeddings
-        embedded_procedures = self.memory.vectors.procedural.get_all_points()
+        embedded_procedures, _ = self.memory.vectors.procedural.get_all_points()
         embedded_procedures_hashes = self.build_embedded_procedures_hashes(
             embedded_procedures
         )
@@ -408,22 +421,22 @@ class CheshireCat:
         caller = utils.get_caller_info()
 
         # here we deal with motherfucking langchain
-        prompt = ChatPromptTemplate(
-            messages=[
-                SystemMessage(content=prompt)
-            ]
-        )
+        prompt = ChatPromptTemplate(messages=[SystemMessage(content=prompt)])
 
         chain = (
             prompt
-            | RunnableLambda(lambda x: utils.langchain_log_prompt(x, f"{caller} prompt"))
+            | RunnableLambda(
+                lambda x: utils.langchain_log_prompt(x, f"{caller} prompt")
+            )
             | self._llm
-            | RunnableLambda(lambda x: utils.langchain_log_output(x, f"{caller} prompt output"))
+            | RunnableLambda(
+                lambda x: utils.langchain_log_output(x, f"{caller} prompt output")
+            )
             | StrOutputParser()
         )
 
         output = chain.invoke(
-            {}, # in case we need to pass info to the template
+            {},  # in case we need to pass info to the template
         )
 
         return output

@@ -16,5 +16,5 @@ class Meta(singleton_meta, ABCMeta):
 class BaseAgent(ABC, metaclass=Meta):
 
     @abstractmethod
-    async def execute(*args, **kwargs) -> AgentOutput:
+    def execute(*args, **kwargs) -> AgentOutput:
         pass
