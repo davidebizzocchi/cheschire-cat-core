@@ -23,7 +23,9 @@ def option(*args: Union[str, Type[Any]], priority: int = 1) -> Union[CatOption, 
                 pass
     """
 
-    def _make_with_name(option_name: str) -> Callable:
+    def _make_with_name(option_name: Any) -> Callable:
+        if not isinstance(option_name, str):
+            option_name = option_name.__name__
         def _make_option(class_: Type[Any]) -> CatOption:
             option_ = CatOption(name=option_name, class_=class_, priority=priority)
             return option_
