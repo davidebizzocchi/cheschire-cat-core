@@ -73,7 +73,8 @@ class CheshireCat:
         self.mad_hatter = MadHatter()
 
         # Start scheduling system
-        self.white_rabbit = self.mad_hatter.get_option(WhiteRabbit)()
+        self.white_rabbit = WhiteRabbit()
+        # print(self.white_rabbit.is_custom)
 
         # allows plugins to do something before cat components are loaded
         self.mad_hatter.execute_hook("before_cat_bootstrap", cat=self)
@@ -91,11 +92,12 @@ class CheshireCat:
         self.on_finish_plugins_sync_callback()
 
         # Main agent instance (for reasoning)
-        self.main_agent = self.mad_hatter.get_option(MainAgent)()
+        # self.main_agent = self.mad_hatter.get_option(MainAgent)()
+        self.main_agent = MainAgent()
 
         # Rabbit Hole Instance
         # self.rabbit_hole = RabbitHole(self)  # :(
-        self.rabbit_hole = self.mad_hatter.get_option(RabbitHole)(self)
+        self.rabbit_hole = RabbitHole(self)
 
         # allows plugins to do something after the cat bootstrap is complete
         self.mad_hatter.execute_hook("after_cat_bootstrap", cat=self)
