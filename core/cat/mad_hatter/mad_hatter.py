@@ -267,6 +267,8 @@ class MadHatter:
         # check if option is supported
         if isinstance(option_type, str):
             option_name = option_type
+        elif isinstance(option_type, CatOption):
+            option_name = option_type.name
         else:
             option_name = option_type.__name__
 
