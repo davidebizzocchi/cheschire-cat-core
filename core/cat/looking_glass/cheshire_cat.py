@@ -74,7 +74,6 @@ class CheshireCat:
 
         # Start scheduling system
         self.white_rabbit = WhiteRabbit()
-        # print(self.white_rabbit.is_custom)
 
         # allows plugins to do something before cat components are loaded
         self.mad_hatter.execute_hook("before_cat_bootstrap", cat=self)
