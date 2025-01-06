@@ -39,7 +39,7 @@ class StrayCat:
         self.__user_id = user_id
         self.__user_data = user_data
 
-        self.working_memory = WorkingMemory()
+        # self.working_memory = WorkingMemory()
 
         # attribute to store ws connection
         self.__ws = ws
