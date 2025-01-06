@@ -15,10 +15,8 @@ from cat.agents.procedures_agent import ProceduresAgent
 from cat.utils import redirect_meta
 from cat.agents.base_agent import Meta
 
-class MainAgentMeta(Meta, redirect_meta):
-    pass
 
-class MainAgent(BaseAgent, metaclass=MainAgentMeta):
+class MainAgent(BaseAgent):
     """Main Agent.
     This class manages sub agents that in turn use the LLM.
     """
