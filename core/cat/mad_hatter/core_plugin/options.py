@@ -10,19 +10,18 @@ class RabbitHoleDefault(RabbitHole):
     is_custom = True
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        log.warning("\n\n\nWELLAAA!!!!!!\n\n\n")
+        log.warning("-------WELLAAA!!!!!!-------")
 
 @option(WhiteRabbit, "WhiteRabbit", priority=0)
 class WhiteRabbitDefault(WhiteRabbit):
     is_custom = True
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        log.warning("\n\n\nWELLAAA!!!!!!\n\n\n")
+        log.warning("-------WELLAAA!!!!!!-------")
 
 @option(MainAgent, priority=0)
 class MainAgentDefault(MainAgent):
     is_custom = True
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        log.warning("\n\n\nWELLAAA!!!!!!\n\n\n")
-
+        log.warning("-------WELLAAA!!!!!!-------")
