@@ -38,7 +38,7 @@ class VectorMemoryCollection:
         # Set attributes (metadata on the embedder are useful because it may change at runtime)
         self.client = client
         self.collection_name = collection_name
-        self.embedder_name = str(embedder_name)
+        self.embedder_name = embedder_name
         self.embedder_size = embedder_size
 
         # Check if memory collection exists also in vectorDB, otherwise create it
@@ -59,7 +59,7 @@ class VectorMemoryCollection:
             == self.embedder_size
         )
         alias = self.embedder_name + "_" + self.collection_name
-        if len(self.client.get_collection_aliases(self.collection_name).aliases) > 1:
+        if len(self.client.get_collection_aliases(self.collection_name).aliases) > 0:
             if (
                 alias
                 == self.client.get_collection_aliases(self.collection_name)

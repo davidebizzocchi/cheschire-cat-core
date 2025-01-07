@@ -294,8 +294,8 @@ class CheshireCat:
         embedder_size = len(self.embedder.embed_query("hello world"))
 
         # Get embedder name (useful for for vectorstore aliases)
-        if hasattr(self.embedder, "model"):
-            embedder_name = self.embedder.model
+        if hasattr(self.embedder, "model_name"):
+            embedder_name = self.embedder.model_name
         elif hasattr(self.embedder, "repo_id"):
             embedder_name = self.embedder.repo_id
         else:

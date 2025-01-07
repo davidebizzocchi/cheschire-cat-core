@@ -51,6 +51,7 @@ dependencies = [
     "APScheduler==3.10.4",
     "ruff==0.4.7",
     "aiofiles==24.1.0",
+    "sentry-sdk[fastapi]"
 ]
 
 [tool.coverage.run]
