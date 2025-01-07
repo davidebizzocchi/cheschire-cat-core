@@ -27,6 +27,22 @@ from cat.routes.static import admin, static
 from cat.routes.openapi import get_openapi_configuration_function
 from cat.looking_glass.cheshire_cat import CheshireCat
 
+
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn=get_env("SENTRY_DSN"),
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    traces_sample_rate=1.0,
+    _experiments={
+        # Set continuous_profiling_auto_start to True
+        # to automatically start the profiler on when
+        # possible.
+        "continuous_profiling_auto_start": True,
+    },
+)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
@@ -67,6 +83,10 @@ cheshire_cat_api = FastAPI(
         "url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
     },
 )
+
+@cheshire_cat_api.get("/sentry-debug")
+async def trigger_error():
+    division_by_zero = 1 / 0
 
 # Configures the CORS middleware for the FastAPI app
 cors_allowed_origins_str = get_env("CCAT_CORS_ALLOWED_ORIGINS")
