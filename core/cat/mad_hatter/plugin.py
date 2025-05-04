@@ -15,6 +15,7 @@ from cat.experimental.form import CatForm
 from cat.utils import to_camel_case
 from cat.log import log
 from cat.settings import cat_settings
+from cat.settings.load import load_settings_from_module
 
 
 # Empty class to represent basic plugin Settings model
@@ -342,11 +343,14 @@ class Plugin:
         if not os.path.isfile(settings_file):
             return
 
-        module = importlib.import_module(self._path.replace("/", ".") + ".settings")
-        log.error(f"Loading settings from {module}")
-        log.error(f"settings: {inspect.getmembers(module, self._is_settings_variable)}")
-        for key, value in inspect.getmembers(module, self._is_settings_variable):
-            cat_settings.set(key, value, force=True)
+        load_settings_from_module(
+            module=importlib.import_module(self._path.replace("/", ".") + ".settings"),
+            exclude_private=True,
+            exclude_non_setting=False,
+            predicate=self._is_settings_variable,
+            # kwargs for set
+            force=True,
+        )
 
     def plugin_specific_error_message(self):
         name = self.manifest.get("name")
