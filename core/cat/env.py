@@ -11,6 +11,7 @@ def get_supported_env_variables():
         "CCAT_DEBUG": "true",
         "CCAT_LOG_LEVEL": "INFO",
         "CCAT_CORS_ALLOWED_ORIGINS": None,
+        "CCAT_USE_VECTOR_DB": "true",
         "CCAT_QDRANT_HOST": None,
         "CCAT_QDRANT_PORT": "6333",
         "CCAT_QDRANT_API_KEY": None,
