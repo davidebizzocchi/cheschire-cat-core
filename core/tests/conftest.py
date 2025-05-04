@@ -16,7 +16,7 @@ from cat.looking_glass.stray_cat import StrayCat
 from cat.auth.permissions import AuthUserInfo
 from cat.db.database import Database
 import cat.utils as utils
-from cat.memory.vector_memory import VectorMemory
+from cat.memory.vector_memory.qdrant import VectorMemory
 from cat.mad_hatter.plugin import Plugin
 from cat.startup import cheshire_cat_api
 from tests.utils import create_mock_plugin_zip

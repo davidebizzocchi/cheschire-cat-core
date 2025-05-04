@@ -4,7 +4,7 @@ from fastapi import Query, Body, Request, APIRouter, HTTPException
 import time
 
 from cat.auth.permissions import AuthPermission, AuthResource, check_permissions
-from cat.memory.vector_memory import VectorMemory
+from cat.memory.vector_memory.qdrant import VectorMemory
 from cat.looking_glass.stray_cat import StrayCat
 from cat.log import log
 
