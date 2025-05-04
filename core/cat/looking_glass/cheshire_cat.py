@@ -28,6 +28,7 @@ from cat.rabbit_hole import RabbitHole
 from cat.utils import singleton
 from cat import utils
 from cat.cache.cache_manager import CacheManager
+from cat.settings.redirect import setting_redirect
 
 
 class Procedure(Protocol):
@@ -42,6 +43,7 @@ class Procedure(Protocol):
 
 
 # main class
+@setting_redirect(safe=True)
 @singleton
 class CheshireCat:
     """The Cheshire Cat.
