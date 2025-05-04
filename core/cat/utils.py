@@ -328,19 +328,42 @@ class singleton:
 
         return getinstance
 
-def get_true_class(cls, recursive: bool = True) -> type:
+def get_true_class(cls, recursive: bool = True, exclude: list = []) -> type:
     """
     Returns the true class of an object, even if it has been decorated or modified.
     This is useful is a class use @singleton decorator.
     """
     if hasattr(cls, "__closure__"):
-        class_ = cls.__closure__[0].cell_contents
+        class_ = None
+        for elem in cls.__closure__:
+            if inspect.isclass(elem.cell_contents) and elem.cell_contents not in exclude:
+                class_ = elem.cell_contents
+                break
+
+        if not class_:
+            return cls
 
         if recursive:
             return get_true_class(class_, recursive=True)
         else:
             return class_
 
+    return cls
+
+def get_class_only_with_singleton(cls):
+    if hasattr(cls, "__closure__"):
+        for elem in cls.__closure__:
+            method = elem.cell_contents
+            if not inspect.isfunction(method):
+                continue
+
+            closure = inspect.getclosurevars(method)
+            if (
+                closure.nonlocals.get("class_") is not None
+                and closure.nonlocals.get("cls") is singleton
+            ):
+                return method
+            
     return cls
 
 
