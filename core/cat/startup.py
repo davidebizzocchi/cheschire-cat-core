@@ -28,6 +28,8 @@ from cat.routes.openapi import get_openapi_configuration_function
 from cat.routes.websocket.websocket_manager import WebsocketManager
 
 from cat.looking_glass.cheshire_cat import CheshireCat
+from cat.settings.load import load_default_settings, load_custom_settings
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -39,6 +41,10 @@ async def lifespan(app: FastAPI):
     # - Not using middleware because I can't make it work with both http and websocket;
     # - Not using Depends because it only supports callables (not instances)
     # - Starlette allows this: https://www.starlette.io/applications/#storing-state-on-the-app-instance
+
+    load_default_settings()
+    load_custom_settings()
+
     app.state.ccat = CheshireCat(cheshire_cat_api)
 
     # set a reference to asyncio event loop
