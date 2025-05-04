@@ -1,7 +1,9 @@
-from .base import Settings
+from cat.settings.base import WonderlandSettings
+from cat.settings.redirect import setting_redirect
 
-settings = Settings()
+cat_settings = WonderlandSettings()
 
 __all__ = [
-    "settings",
+    "cat_settings",
+    "setting_redirect",
 ]
