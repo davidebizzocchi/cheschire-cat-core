@@ -328,6 +328,21 @@ class singleton:
 
         return getinstance
 
+def get_true_class(cls, recursive: bool = True) -> type:
+    """
+    Returns the true class of an object, even if it has been decorated or modified.
+    This is useful is a class use @singleton decorator.
+    """
+    if hasattr(cls, "__closure__"):
+        class_ = cls.__closure__[0].cell_contents
+
+        if recursive:
+            return get_true_class(class_, recursive=True)
+        else:
+            return class_
+
+    return cls
+
 
 # Class mixing pydantic BaseModel with dictionaries (added for backward compatibility, to be deprecated in v2)
 class BaseModelDict(BaseModel):
