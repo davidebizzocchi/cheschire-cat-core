@@ -14,6 +14,7 @@ from cat.mad_hatter.decorators import CatTool, CatHook, CatPluginDecorator, Cust
 from cat.experimental.form import CatForm
 from cat.utils import to_camel_case
 from cat.log import log
+from cat.settings import cat_settings
 
 
 # Empty class to represent basic plugin Settings model
@@ -335,6 +336,17 @@ class Plugin:
         self._endpoints = list(map(self._clean_endpoint, endpoints))
         self._plugin_overrides = {override.name: override for override in list(map(self._clean_plugin_override, plugin_overrides))}
 
+    def _load_settings_variables(self):
+        settings_file = os.path.join(self._path, "settings.py")
+
+        if not os.path.isfile(settings_file):
+            return
+
+        module = importlib.import_module(self._path.replace("/", ".") + ".settings")
+        log.error(f"Loading settings from {module}")
+        log.error(f"settings: {inspect.getmembers(module, self._is_settings_variable)}")
+        for key, value in inspect.getmembers(module, self._is_settings_variable):
+            cat_settings.set(key, value, force=True)
 
     def plugin_specific_error_message(self):
         name = self.manifest.get("name")
@@ -411,7 +423,21 @@ class Plugin:
     @staticmethod
     def _is_custom_endpoint(obj):
         return isinstance(obj, CustomEndpoint)
-    
+
+    @staticmethod
+    def _is_settings_variable(obj):
+        if inspect.isbuiltin(obj):
+            return True
+
+        if inspect.isclass(obj):
+            return False
+
+        if inspect.isfunction(obj):
+            return False
+
+        if inspect.ismodule(obj):
+            return False
+
     @property
     def path(self):
         return self._path
