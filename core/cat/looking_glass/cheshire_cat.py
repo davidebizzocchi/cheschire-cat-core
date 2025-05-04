@@ -23,7 +23,7 @@ from cat.agents.main_agent import MainAgent
 from cat.looking_glass.white_rabbit import WhiteRabbit
 from cat.log import log
 from cat.mad_hatter.mad_hatter import MadHatter
-from cat.memory.long_term_memory import LongTermMemory
+from cat.memory.dispatch import get_long_term_memory_class
 from cat.rabbit_hole import RabbitHole
 from cat.utils import singleton
 from cat import utils
@@ -302,7 +302,7 @@ class CheshireCat:
             "embedder_name": embedder_name,
             "embedder_size": embedder_size,
         }
-        self.memory = LongTermMemory(vector_memory_config=vector_memory_config)
+        self.memory = get_long_term_memory_class()(vector_memory_config=vector_memory_config)
 
     def build_embedded_procedures_hashes(self, embedded_procedures):
         hashes = {}
