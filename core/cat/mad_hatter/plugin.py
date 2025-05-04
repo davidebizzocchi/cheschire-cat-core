@@ -6,7 +6,7 @@ import tempfile
 import importlib
 import subprocess
 from typing import Dict, List
-from inspect import getmembers, isclass
+import inspect
 from pydantic import BaseModel, ValidationError
 from packaging.requirements import Requirement
 
@@ -315,11 +315,11 @@ class Plugin:
             try:
                 plugin_module = importlib.import_module(py_filename)
 
-                hooks += getmembers(plugin_module, self._is_cat_hook)
-                tools += getmembers(plugin_module, self._is_cat_tool)
-                forms += getmembers(plugin_module, self._is_cat_form)
-                endpoints += getmembers(plugin_module, self._is_custom_endpoint)
-                plugin_overrides += getmembers(
+                hooks += inspect.getmembers(plugin_module, self._is_cat_hook)
+                tools += inspect.getmembers(plugin_module, self._is_cat_tool)
+                forms += inspect.getmembers(plugin_module, self._is_cat_form)
+                endpoints += inspect.getmembers(plugin_module, self._is_custom_endpoint)
+                plugin_overrides += inspect.getmembers(
                     plugin_module, self._is_cat_plugin_override
                 )
             except Exception:
@@ -367,7 +367,7 @@ class Plugin:
         f = form[1]
         f.plugin_id = self._id
         return f
-    
+
     def _clean_endpoint(self, endpoint: CustomEndpoint):
         # getmembers returns a tuple
         f = endpoint[1]
@@ -386,7 +386,7 @@ class Plugin:
 
     @staticmethod
     def _is_cat_form(obj):
-        if not isclass(obj) or obj is CatForm:
+        if not inspect.isclass(obj) or obj is CatForm:
             return False
 
         if not issubclass(obj, CatForm) or not obj._autopilot:
@@ -443,7 +443,7 @@ class Plugin:
     @property
     def endpoints(self):
         return self._endpoints
-    
+
     @property
     def overrides(self):
         return self._plugin_overrides
