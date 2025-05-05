@@ -20,6 +20,7 @@ def load_settings_from_module(module, exclude_private=True, exclude_non_setting=
         if predicate and not predicate(setting): continue
 
         if isinstance(setting, SettingElement):
+            setting.set_default()
             settings.set(setting.name, setting, **kwargs)
 
 

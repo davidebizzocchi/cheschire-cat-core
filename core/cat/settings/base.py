@@ -44,13 +44,15 @@ class SettingElement:
         self.type_ = Type if type_ == "class" else type_
 
         self.value = None
-        self.set(default)
+
+    def set_default(self):
+        self.set(self.default)
 
     def get(self) -> Any:
         return self.value
 
     def set(self, value: Any) -> None:
-        value = self._parse_value(value)
+        value = self.check_value(value)
 
         # Check if the value is of the expected type
         if self.type_ and not isinstance(value, self.type_):
@@ -62,7 +64,7 @@ class SettingElement:
         self.value = None
 
 
-    def _parse_value(self, value: Any) -> Any:
+    def check_value(self, value: Any) -> Any:
         # Import class from string (e.g. "cat.module.file.ClassName")
         if isinstance(value, str) and (Type is self.type_ or Type in get_args(self.type_)):
             try:
