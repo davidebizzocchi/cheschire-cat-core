@@ -3,7 +3,6 @@ import inspect
 from typing import Any, Dict, Type
 from functools import wraps
 
-from cat.log import log
 from cat.utils import singleton, get_true_class, get_class_only_with_singleton
 
 
@@ -54,7 +53,7 @@ class SettingElement:
 
         # Check if the value is of the expected type
         if self.type_ and not isinstance(value, self.type_):
-            log.warning(f"Type mismatch for setting '{self.name}': expected {self.type_}, got {type(value)}")
+            raise TypeError(f"Type mismatch for setting '{self.name}': expected {self.type_}, got {type(value)}")
             return
 
         self.value = value
@@ -72,7 +71,7 @@ class SettingElement:
                 module = importlib.import_module(module_name.replace("/", ".").replace(".py", ""))
                 return  get_class_only_with_singleton(getattr(module, class_name))
             except (ImportError, AttributeError) as e:
-                log.warning(f"Error importing class '{value}': {e}")
+                raise ImportError(f"Error importing class '{value}': {e}")
             
         return value
 
