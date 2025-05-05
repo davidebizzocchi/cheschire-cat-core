@@ -22,9 +22,6 @@ def load_settings_from_module(module, exclude_private=True, exclude_non_setting=
         if isinstance(setting, SettingElement):
             settings.set(setting.name, setting, **kwargs)
 
-    import pprint
-    print(f"settings: {pprint.pformat(settings._settings)}")
-
 
 def load_default_settings():
     import cat.settings.default as default_settings
