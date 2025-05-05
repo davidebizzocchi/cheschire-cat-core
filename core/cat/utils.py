@@ -13,8 +13,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.utils import get_colored_text
 
-from cat.log import log
-from cat.env import get_env
+from cat.settings.lazy import cat_settings
 
 
 def to_camel_case(text: str) -> str:
@@ -85,9 +84,9 @@ def verbal_timedelta(td: timedelta) -> str:
 
 def get_base_url():
     """Allows exposing the base url."""
-    secure = "s" if get_env("CCAT_CORE_USE_SECURE_PROTOCOLS") in ("true", "1") else ""
-    cat_host = get_env("CCAT_CORE_HOST")
-    cat_port = get_env("CCAT_CORE_PORT")
+    secure = "s" if cat_settings.CCAT_CORE_USE_SECURE_PROTOCOLS in ("true", "1") else ""
+    cat_host = cat_settings.CCAT_CORE_HOST
+    cat_port = cat_settings.CCAT_CORE_PORT
     return f"http{secure}://{cat_host}:{cat_port}/"
 
 
@@ -129,6 +128,8 @@ def extract_domain_from_url(url):
 
 def explicit_error_message(e):
     # add more explicit info on "RateLimitError" by OpenAI, 'cause people can't get it
+    from cat.log import log
+
     error_description = str(e)
     if "billing details" in error_description:
         # happens both when there are no credits or the key is not active
@@ -146,7 +147,8 @@ HOW TO FIX: go to your OpenAI accont and add a credit card"""
 def deprecation_warning(message: str, skip=3):
     """Log a deprecation warning with caller's information.
         "skip" is the number of stack levels to go back to the caller info."""
-    
+    from cat.log import log
+
     caller = get_caller_info(skip, return_short=False)
 
     # Format and log the warning message
@@ -190,6 +192,7 @@ def match_prompt_variables(
         prompt_template: str
     ) -> Tuple[Dict, str]:
     """Ensure prompt variables and prompt placeholders map, so there are no issues on mismatches"""
+    from cat.log import log
 
     tmp_prompt = PromptTemplate.from_template(
         template=prompt_template
@@ -285,7 +288,7 @@ def get_caller_info(skip=2, return_short=True, return_string=True):
 
 
 def langchain_log_prompt(langchain_prompt, title):
-    if(get_env("CCAT_DEBUG") == "true"):
+    if(cat_settings.CCAT_DEBUG == "true"):
         print("\n")
         print(get_colored_text(f"===== {title} =====", "green"))
         for m in langchain_prompt.messages:
@@ -305,7 +308,7 @@ def langchain_log_prompt(langchain_prompt, title):
 
 
 def langchain_log_output(langchain_output, title):
-    if(get_env("CCAT_DEBUG") == "true"):
+    if(cat_settings.CCAT_DEBUG == "true"):
         print("\n")
         print(get_colored_text(f"===== {title} =====", "blue"))
         if hasattr(langchain_output, 'content'):
