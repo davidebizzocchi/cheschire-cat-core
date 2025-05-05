@@ -8,6 +8,13 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
+# Load settings
+# This is needed before import the log instance
+from cat.settings.load import load_default_settings, load_custom_settings, load_env_settings
+load_env_settings()
+load_default_settings()
+load_custom_settings()
+
 from cat.log import log
 from cat.env import get_env
 from cat.routes import (
