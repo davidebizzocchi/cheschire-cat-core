@@ -21,10 +21,12 @@ from cat.agents import AgentOutput
 from cat.cache.cache_item import CacheItem
 from cat import utils
 from cat.log import log
+from cat.settings.redirect import setting_redirect
 
 MSG_TYPES = Literal["notification", "chat", "error", "chat_token"]
 
 # The Stray cat goes around tools, hooks and endpoints... making troubles
+@setting_redirect()
 class StrayCat:
     """Session object containing user data, conversation state and many utility pointers.
     The framework creates an instance for every http request and websocket connection, making it available for plugins.

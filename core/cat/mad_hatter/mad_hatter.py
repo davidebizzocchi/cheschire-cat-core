@@ -20,12 +20,14 @@ from cat.mad_hatter.decorators.tool import CatTool
 from cat.mad_hatter.decorators.endpoint import CustomEndpoint
 
 from cat.experimental.form import CatForm
+from cat.settings.redirect import setting_redirect
 
 
 # This class is responsible for plugins functionality:
 # - loading
 # - prioritizing
 # - executing
+@setting_redirect()
 @singleton
 class MadHatter:
     # loads and execute plugins
