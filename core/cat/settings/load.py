@@ -22,7 +22,9 @@ def load_settings_from_module(module, exclude_private=True, exclude_non_setting=
         if isinstance(setting, SettingElement):
             setting.set_default()
             settings.set(setting.name, setting, **kwargs)
-
+        # Update settings
+        else:
+            settings.set(var_name, setting, **kwargs)
 
 def load_default_settings():
     import cat.settings.default as default_settings

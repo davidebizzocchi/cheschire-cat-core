@@ -54,8 +54,8 @@ class SettingElement:
     def set(self, value: Any) -> None:
         value = self.check_value(value)
 
-        # Check if the value is of the expected type
-        if self.type_ and not isinstance(value, self.type_):
+        # Check if the value is of the expected type
+        if self.type_ and not (isinstance(value, self.type_) or isinstance(type(value), self.type_)):
             raise TypeError(f"Type mismatch for setting '{self.name}': expected {self.type_}, got {type(value)}")
 
         self.value = value
@@ -114,11 +114,16 @@ class WonderlandSettings:
             value: The value to set.
             force: If True and the value is not a SettingElement, set it directly.
         """
-        if value and isinstance(value, SettingElement):
-            self._settings[key] = value
-        elif force:
-            # If the setting is not a SettingElement, set it directly
-            self._settings[key] = value
+        # Update
+        if self.has(key):
+            prev_value = self._settings[key]
+            if isinstance(prev_value, SettingElement): prev_value.set(value)
+            else: self._settings[key] = value  # Ensure also immutable objects are updated
+
+        # Set a new value
+        if value and isinstance(value, SettingElement): self._settings[key] = value
+        # Insert if forced
+        elif force: self._settings[key] = value
 
     @parse_key
     def delete(self, key: str) -> None:
