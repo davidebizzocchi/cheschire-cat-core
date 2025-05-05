@@ -16,7 +16,6 @@ load_default_settings()
 load_custom_settings()
 
 from cat.log import log
-from cat.env import get_env
 from cat.routes import (
     base,
     auth,
@@ -35,8 +34,7 @@ from cat.routes.openapi import get_openapi_configuration_function
 from cat.routes.websocket.websocket_manager import WebsocketManager
 
 from cat.looking_glass.cheshire_cat import CheshireCat
-from cat.settings.load import load_default_settings, load_custom_settings
-
+from cat.settings.lazy import cat_settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -48,9 +46,6 @@ async def lifespan(app: FastAPI):
     # - Not using middleware because I can't make it work with both http and websocket;
     # - Not using Depends because it only supports callables (not instances)
     # - Starlette allows this: https://www.starlette.io/applications/#storing-state-on-the-app-instance
-
-    load_default_settings()
-    load_custom_settings()
 
     app.state.ccat = CheshireCat(cheshire_cat_api)
 
@@ -84,9 +79,9 @@ cheshire_cat_api = FastAPI(
 )
 
 # Configures the CORS middleware for the FastAPI app
-cors_enabled = get_env("CCAT_CORS_ENABLED")
+cors_enabled = cat_settings.CCAT_CORS_ENABLED
 if cors_enabled == "true":
-    cors_allowed_origins_str = get_env("CCAT_CORS_ALLOWED_ORIGINS")
+    cors_allowed_origins_str = cat_settings.CCAT_CORS_ALLOWED_ORIGINS
     origins = cors_allowed_origins_str.split(",") if cors_allowed_origins_str else ["*"]
     cheshire_cat_api.add_middleware(
         CORSMiddleware,
@@ -137,7 +132,7 @@ async def validation_exception_handler(request, exc):
 # openapi customization
 cheshire_cat_api.openapi = get_openapi_configuration_function(cheshire_cat_api)
 
-if get_env("CCAT_DEBUG") == "true":
+if cat_settings.CCAT_DEBUG == "true":
     @cheshire_cat_api.get("/docs", include_in_schema=False)
     async def scalar_docs():
         return get_scalar_api_reference(

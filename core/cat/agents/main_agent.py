@@ -11,6 +11,7 @@ from cat.env import get_env
 from cat.agents import BaseAgent, AgentOutput
 from cat.agents.memory_agent import MemoryAgent
 from cat.agents.procedures_agent import ProceduresAgent
+from cat.settings.lazy import cat_settings
 
 
 class MainAgent(BaseAgent):
@@ -21,7 +22,7 @@ class MainAgent(BaseAgent):
     def __init__(self):
         self.mad_hatter = MadHatter()
 
-        if get_env("CCAT_LOG_LEVEL") in ["DEBUG", "INFO"]:
+        if cat_settings.CCAT_LOG_LEVEL in ["DEBUG", "INFO"]:
             self.verbose = True
         else:
             self.verbose = False

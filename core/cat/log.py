@@ -8,11 +8,12 @@ from pprint import pformat
 from loguru import logger
 
 from cat.env import get_env
+from cat.settings.lazy import cat_settings
 
 
 def get_log_level():
     """Return the global LOG level."""
-    return get_env("CCAT_LOG_LEVEL")
+    return cat_settings.CCAT_LOG_LEVEL
 
 
 class CatLogEngine:
@@ -145,10 +146,10 @@ class CatLogEngine:
 
     def welcome(self):
         """Welcome message in the terminal."""
-        secure = "s" if get_env("CCAT_CORE_USE_SECURE_PROTOCOLS") in ("true", "1") else ""
+        secure = "s" if cat_settings.CCAT_CORE_USE_SECURE_PROTOCOLS in ("true", "1") else ""
 
-        cat_host = get_env("CCAT_CORE_HOST")
-        cat_port = get_env("CCAT_CORE_PORT")
+        cat_host = cat_settings.CCAT_CORE_HOST
+        cat_port = cat_settings.CCAT_CORE_PORT
         cat_address = f"http{secure}://{cat_host}:{cat_port}"
 
         print("\n\n")

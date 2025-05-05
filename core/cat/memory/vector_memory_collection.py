@@ -25,6 +25,7 @@ from langchain.docstore.document import Document
 
 from cat.log import log
 from cat.env import get_env
+from cat.settings.lazy import cat_settings
 
 
 class VectorMemoryCollection:
@@ -71,7 +72,7 @@ class VectorMemoryCollection:
             log.warning(f'Collection "{self.collection_name}" has a different embedder')
             # Memory snapshot saving can be turned off in the .env file with:
             # SAVE_MEMORY_SNAPSHOTS=false
-            if get_env("CCAT_SAVE_MEMORY_SNAPSHOTS") == "true":
+            if cat_settings.CCAT_SAVE_MEMORY_SNAPSHOTS == "true":
                 # dump collection on disk before deleting
                 self.save_dump()
 

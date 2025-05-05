@@ -7,6 +7,7 @@ from qdrant_client import QdrantClient
 from cat.memory.vector_memory_collection import VectorMemoryCollection
 from cat.log import log
 from cat.env import get_env
+from cat.settings.lazy import cat_settings
 # from cat.utils import singleton
 
 
@@ -46,7 +47,7 @@ class VectorMemory:
 
     def connect_to_vector_memory(self) -> None:
         db_path = "cat/data/local_vector_memory/"
-        qdrant_host = get_env("CCAT_QDRANT_HOST")
+        qdrant_host = cat_settings.CCAT_QDRANT_HOST
 
         if not qdrant_host:
             log.debug(f"Qdrant path: {db_path}")
@@ -61,12 +62,12 @@ class VectorMemory:
             self.vector_db = VectorMemory.local_vector_db
         else:
             # Qdrant remote or in other container
-            qdrant_port = int(get_env("CCAT_QDRANT_PORT"))
+            qdrant_port = int(cat_settings.CCAT_QDRANT_PORT)
             qdrant_https = is_https(qdrant_host)
             qdrant_host = extract_domain_from_url(qdrant_host)
-            qdrant_api_key = get_env("CCAT_QDRANT_API_KEY")
+            qdrant_api_key = cat_settings.CCAT_QDRANT_API_KEY
             
-            qdrant_client_timeout = get_env("CCAT_QDRANT_CLIENT_TIMEOUT")
+            qdrant_client_timeout = cat_settings.CCAT_QDRANT_CLIENT_TIMEOUT
             qdrant_client_timeout = int(qdrant_client_timeout) if qdrant_client_timeout is not None else None
 
             try:

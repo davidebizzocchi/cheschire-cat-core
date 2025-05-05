@@ -11,6 +11,7 @@ from cat.auth.permissions import (
 from cat.auth.auth_utils import is_jwt, check_password
 from cat.env import get_env
 from cat.log import log
+from cat.settings.lazy import cat_settings
 
 
 class BaseAuthHandler(ABC):  # TODOAUTH: pydantic model?
@@ -74,8 +75,8 @@ class CoreAuthHandler(BaseAuthHandler):
             # decode token
             payload = jwt.decode(
                 token,
-                get_env("CCAT_JWT_SECRET"),
-                algorithms=[get_env("CCAT_JWT_ALGORITHM")],
+                cat_settings.CCAT_JWT_SECRET,
+                algorithms=[cat_settings.CCAT_JWT_ALGORITHM],
             )
 
             # get user from DB
@@ -106,8 +107,8 @@ class CoreAuthHandler(BaseAuthHandler):
             auth_resource: AuthResource,
             auth_permission: AuthPermission,
     ) -> AuthUserInfo | None:
-        http_key = get_env("CCAT_API_KEY")
-        ws_key = get_env("CCAT_API_KEY_WS")
+        http_key = cat_settings.CCAT_API_KEY
+        ws_key = cat_settings.CCAT_API_KEY_WS
 
         if not http_key and not ws_key:
             return AuthUserInfo(
@@ -158,7 +159,7 @@ class CoreAuthHandler(BaseAuthHandler):
             if user["username"] == username and check_password(password, user["password"]):
                 # TODOAUTH: expiration with timezone needs to be tested
                 # using seconds for easier testing
-                expire_delta_in_seconds = float(get_env("CCAT_JWT_EXPIRE_MINUTES")) * 60
+                expire_delta_in_seconds = float(cat_settings.CCAT_JWT_EXPIRE_MINUTES) * 60
                 expires = datetime.now(utc) + timedelta(seconds=expire_delta_in_seconds)
                 # TODOAUTH: add issuer and redirect_uri (and verify them when a token is validated)
 
@@ -170,8 +171,8 @@ class CoreAuthHandler(BaseAuthHandler):
                 }
                 return jwt.encode(
                     jwt_content,
-                    get_env("CCAT_JWT_SECRET"),
-                    algorithm=get_env("CCAT_JWT_ALGORITHM"),
+                    cat_settings.CCAT_JWT_SECRET,
+                    algorithm=cat_settings.CCAT_JWT_ALGORITHM,
                 )
         return None
 
