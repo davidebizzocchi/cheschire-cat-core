@@ -1,6 +1,9 @@
 from cat.env import get_env
 from cat.settings.lazy import cat_settings
+from cat.settings.redirect import setting_redirect
 
+
+@setting_redirect()
 class CacheManager:
     """Class to instantiate different cache types."""
 

@@ -16,8 +16,10 @@ from cat.mad_hatter.plugin import Plugin
 from cat.log import log
 from cat.looking_glass.callbacks import ModelInteractionHandler
 from cat import utils
+from cat.settings.redirect import setting_redirect
 
 
+@setting_redirect()
 class ProceduresAgent(BaseAgent):
 
     form_agent = FormAgent()

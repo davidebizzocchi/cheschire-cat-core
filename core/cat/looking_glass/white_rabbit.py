@@ -11,9 +11,11 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from cat.log import log
 
 from cat.utils import singleton
+from cat.settings.redirect import setting_redirect
 
 
 # I'm late, I'm late, for a very important date!
+@setting_redirect()
 @singleton
 class WhiteRabbit:
     """The WhiteRabbit

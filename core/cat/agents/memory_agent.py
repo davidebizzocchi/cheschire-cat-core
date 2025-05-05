@@ -7,8 +7,10 @@ from langchain_core.output_parsers.string import StrOutputParser
 from cat.looking_glass.callbacks import NewTokenHandler, ModelInteractionHandler
 from cat.agents import BaseAgent, AgentOutput
 from cat import utils
+from cat.settings.redirect import setting_redirect
 
 
+@setting_redirect()
 class MemoryAgent(BaseAgent):
 
     def execute(self, cat, prompt_prefix, prompt_suffix) -> AgentOutput:

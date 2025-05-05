@@ -1,7 +1,10 @@
 from cat.experimental.form import CatFormState
 from cat.agents import BaseAgent, AgentOutput
 from cat.log import log
+from cat.settings.redirect import setting_redirect
 
+
+@setting_redirect()
 class FormAgent(BaseAgent):
 
     def execute(self, cat) -> AgentOutput:

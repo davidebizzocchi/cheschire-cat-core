@@ -12,8 +12,10 @@ from cat.agents import BaseAgent, AgentOutput
 from cat.agents.memory_agent import MemoryAgent
 from cat.agents.procedures_agent import ProceduresAgent
 from cat.settings.lazy import cat_settings
+from cat.settings.redirect import setting_redirect
 
 
+# @setting_redirect()
 class MainAgent(BaseAgent):
     """Main Agent.
     This class manages sub agents that in turn use the LLM.

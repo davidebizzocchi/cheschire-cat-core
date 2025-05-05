@@ -20,8 +20,9 @@ from langchain.document_loaders.blob_loaders.schema import Blob
 
 from cat.utils import singleton
 from cat.log import log
+from cat.settings.redirect import setting_redirect
 
-
+@setting_redirect()
 @singleton
 class RabbitHole:
     """Manages content ingestion. I'm late... I'm late!"""
