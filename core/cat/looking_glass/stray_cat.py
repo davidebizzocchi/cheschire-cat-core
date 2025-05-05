@@ -175,7 +175,7 @@ class StrayCat:
         else:
             self.__send_ws_json({"type": msg_type, "content": content})
 
-    def send_chat_message(self, message: str | CatMessage, save=False):
+    def send_chat_message(self, message: Union[str, CatMessage], save=False):
         """Sends a chat message to the user using the active WebSocket connection.  
         In case there is no connection the message is skipped and a warning is logged
 
