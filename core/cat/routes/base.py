@@ -5,6 +5,7 @@ import tomli
 from cat.auth.permissions import AuthPermission, AuthResource, check_permissions
 
 from cat.convo.messages import CatMessage
+from cat.utils import get_true_class
 
 router = APIRouter()
 
@@ -21,7 +22,7 @@ async def status(
     return {"status": "We're all mad here, dear!", "version": project_toml["version"]}
 
 
-@router.post("/message", response_model=CatMessage)
+@router.post("/message", response_model=get_true_class(CatMessage))
 async def message_with_cat(
     payload: Dict = Body({"text": "hello!"}),
     cat=check_permissions(AuthResource.CONVERSATION, AuthPermission.WRITE),

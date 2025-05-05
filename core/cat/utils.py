@@ -350,6 +350,9 @@ def get_true_class(cls, recursive: bool = True, exclude: list = []) -> type:
             return get_true_class(class_, recursive=True)
         else:
             return class_
+    
+    if hasattr(cls, "original_class"):
+        return cls.original_class
 
     return cls
 
@@ -366,6 +369,9 @@ def get_class_only_with_singleton(cls):
                 and closure.nonlocals.get("cls") is singleton
             ):
                 return method
+            
+    if hasattr(cls, "original_class"):
+        return cls.original_class
             
     return cls
 

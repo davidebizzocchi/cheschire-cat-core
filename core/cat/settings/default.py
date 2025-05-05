@@ -3,13 +3,28 @@ These are the default settings for the Cat's whimsical world.
 Tread carefully, down the rabbit hole we go!
 """
 from types import FunctionType
-from typing import Type
+from typing import Type, Union
 from cat.settings.base import SettingElement
 
 
 # Type hint for things that can be a class, a singleton function, or just a string path
 # Basically, anything that helps us find our way in Wonderland.
-_class_or_singleton_type = FunctionType | Type | str
+_class_or_singleton_type = Union[FunctionType, Type, str, object]
+
+
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# |       Conversation Components            |
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CAT_MESSAGE = SettingElement(
+    name="CAT_MESSAGE",
+    default="cat.convo.messages.CatMessage",
+    type_=_class_or_singleton_type
+)
+USER_MESSAGE = SettingElement(
+    name="USER_MESSAGE",
+    default="cat.convo.messages.UserMessage",
+    type_=_class_or_singleton_type
+)
 
 
 #  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

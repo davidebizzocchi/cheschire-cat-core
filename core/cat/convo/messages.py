@@ -12,6 +12,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from cat.convo.model_interactions import LLMModelInteraction, EmbedderModelInteraction
 from cat.utils import BaseModelDict, deprecation_warning
 from cat.log import log
+from cat.settings.redirect import setting_redirect
 
 
 class Role(Enum):
@@ -132,7 +133,7 @@ class ConversationMessage(Message):
         """The role of the message author."""
         return None
 
-
+@setting_redirect()
 class CatMessage(ConversationMessage):
     """
     Represents a Cat message.
@@ -222,6 +223,7 @@ class CatMessage(ConversationMessage):
         )
 
 
+@setting_redirect()
 class UserMessage(ConversationMessage):
     """
     Represents a message from a user, containing text and optional multimedia content such as image and audio.
