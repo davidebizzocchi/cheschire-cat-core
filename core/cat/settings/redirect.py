@@ -31,7 +31,7 @@ def setting_redirect(safe=False):
     Decorator to redirect class instantiation to a setting.
     safe: If True, return the original class if setting not found
     """
-    from cat.settings import cat_settings
+    from cat.settings.lazy import cat_settings
 
     def decorator_wrapper(cls):
         true_class = get_true_class(cls, exclude=[singleton])

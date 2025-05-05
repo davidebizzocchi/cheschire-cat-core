@@ -14,7 +14,6 @@ from cat.mad_hatter.decorators import CatTool, CatHook, CatPluginDecorator, Cust
 from cat.experimental.form import CatForm
 from cat.utils import to_camel_case
 from cat.log import log
-from cat.settings import cat_settings
 from cat.settings.load import load_settings_from_module
 
 

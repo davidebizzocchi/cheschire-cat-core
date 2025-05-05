@@ -3,9 +3,8 @@ import inspect
 from typing import Any, Dict, Type
 from functools import wraps
 
-from cat.utils import singleton
 from cat.log import log
-from cat.utils import get_true_class, get_class_only_with_singleton
+from cat.utils import singleton, get_true_class, get_class_only_with_singleton
 
 
 def parse_key(func) -> str:
@@ -127,4 +126,8 @@ class WonderlandSettings:
         if value and  isinstance(value, SettingElement):
             return value.default
         return None
-        
+    
+    @parse_key
+    def has(self, key: str) -> bool:
+        """Check if a setting exists."""
+        return key in self._settings
