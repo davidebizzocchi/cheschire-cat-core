@@ -1,9 +1,10 @@
 import importlib
 import inspect
-from typing import Any, Dict, Type
+from typing import Any, Dict, Type, get_args
 from functools import wraps
 
 from cat.utils import singleton, get_true_class, get_class_only_with_singleton
+from cat.settings.utils import format_setting_name
 
 
 def parse_key(func) -> str:
@@ -38,7 +39,7 @@ class SettingElement:
     """
 
     def __init__(self, name: str, default: Any, type_: Type = str):
-        self.name = name
+        self.name = format_setting_name(name)
         self.default = default
         self.type_ = Type if type_ == "class" else type_
 
@@ -54,7 +55,6 @@ class SettingElement:
         # Check if the value is of the expected type
         if self.type_ and not isinstance(value, self.type_):
             raise TypeError(f"Type mismatch for setting '{self.name}': expected {self.type_}, got {type(value)}")
-            return
 
         self.value = value
 
@@ -63,15 +63,22 @@ class SettingElement:
 
 
     def _parse_value(self, value: Any) -> Any:
-        # Import class from string
-        # e.g. "module.ClassName"
-        if isinstance(value, str) and self.type_ is Type:
+        # Import class from string (e.g. "cat.module.file.ClassName")
+        if isinstance(value, str) and (Type is self.type_ or Type in get_args(self.type_)):
             try:
                 module_name, class_name = value.rsplit(".", 1)
                 module = importlib.import_module(module_name.replace("/", ".").replace(".py", ""))
-                return  get_class_only_with_singleton(getattr(module, class_name))
+                class_ = getattr(module, class_name)
+
+                # Handle singleton/alternative class resolution
+                true_class = get_class_only_with_singleton(class_)
+                if true_class is class_:
+                    return get_true_class(class_)
+
+                return true_class
+
             except (ImportError, AttributeError) as e:
-                raise ImportError(f"Error importing class '{value}': {e}")
+                raise ImportError(f"Error importing class '{value}': {e}") from e
             
         return value
 
